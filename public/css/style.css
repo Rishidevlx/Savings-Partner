@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #00A79D;
+    --primary-light: #E6F6F5;
+    --secondary-color: #333;
+    --text-color: #555;
+    --border-color: #ddd;
+    --bg-color: #F4F7FA;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: var(--text-color);
+    overflow: hidden; /* To contain the animated circles */
+    position: relative;
+}
+
+/* Background Animated Shapes */
+body::before, body::after {
+    content: '';
+    position: absolute;
+    background: var(--primary-color);
+    border-radius: 45%;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+body::before {
+    top: -10%;
+    left: -15%;
+    width: 500px;
+    height: 500px;
+    animation: wave-animation 15s infinite ease-in-out;
+}
+
+body::after {
+    bottom: -15%;
+    right: -15%;
+    width: 600px;
+    height: 600px;
+    animation: wave-animation-2 20s infinite ease-in-out;
+}
+
+@keyframes wave-animation {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+    100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes wave-animation-2 {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(-180deg) scale(1.05); }
+    100% { transform: rotate(-360deg) scale(1); }
+}
+
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 950px; /* Reduced max-width */
+    height: 600px; /* Fixed height */
+    background-color: #fff;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- Left Panel --- */
+.left-panel {
+    flex-basis: 50%;
+    background-color: var(--primary-light);
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.slider-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.slide.active {
+    opacity: 1;
+}
+
+.slide.image-slide {
+    background-size: cover;
+    background-position: center;
+}
+
+.text-slide h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--secondary-color);
+}
+
+.text-slide p {
+    font-size: 14px;
+    max-width: 350px;
+    line-height: 1.6;
+}
+.text-slide .logo {
+    margin-bottom: 20px;
+}
+
+.slider-dots {
+    position: absolute;
+    bottom: 40px;
+}
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #ccc;
+    margin: 0 5px;
+    transition: background-color 0.3s ease;
+}
+
+.dot.active {
+    background-color: var(--primary-color);
+}
+
+
+/* --- Right Panel --- */
+.right-panel {
+    flex-basis: 50%;
+    padding: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 350px;
+}
+
+.form-section {
+    display: none;
+}
+.form-section.active {
+    display: block;
+}
+
+.form-header h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--secondary-color);
+    margin-bottom: 5px;
+}
+
+.form-header p {
+    font-size: 14px;
+}
+
+.form-header a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+#signup-form, #signin-form {
+    margin-top: 30px;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.input-group input {
+    width: 100%;
+    border: none;
+    border-bottom: 2px solid var(--border-color);
+    padding: 10px 0;
+    font-size: 16px;
+    background-color: transparent;
+    font-family: 'Poppins', sans-serif;
+    position: relative;
+    z-index: 1;
+}
+
+.input-group label {
+    position: absolute;
+    top: 10px;
+    left: 0;
+    font-size: 16px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-bottom-color: var(--primary-color);
+}
+
+.input-group input:focus + label,
+.input-group input:valid + label,
+.input-group input:required:not(:placeholder-shown) + label {
+    top: -15px;
+    font-size: 12px;
+    color: var(--primary-color);
+}
+
+.password-group {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #aaa;
+    z-index: 2;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.btn-submit:hover {
+    background-color: #008f86;
+}
+
+/* Validation Styles from Just-Validate */
+.just-validate-error-label {
+    font-size: 12px;
+    color: #e74c3c !important;
+    margin-top: 5px;
+}
+
+.just-validate-success-field {
+    border-bottom-color: #2ecc71 !important;
+}
+
+.just-validate-error-field {
+    border-bottom-color: #e74c3c !important;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .container {
+        flex-direction: column;
+        width: 95%;
+        max-width: 500px;
+        height: auto;
+    }
+    .left-panel {
+        display: none;
+    }
+    .right-panel {
+        padding: 40px;
+    }
+}
+
+/* Add this to the end of your style.css */
+.logo img {
+    width: 65px;  /* Adjust the size as you need */
+    height: 65px;
+    object-fit: cover; /* Ensures the image covers the area without distortion */
+    border-radius: 15%; /* Makes the logo image circular */
+}

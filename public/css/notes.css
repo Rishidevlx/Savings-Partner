@@ -1,0 +1,119 @@
+/* public/css/notes.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #00A79D;
+    --dark-blue: #2c3e50;
+    --light-gray: #f4f7fa;
+    --text-color: #555;
+    --card-bg: #fff;
+    --border-color: #e0e0e0;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    --delete-color: #e74c3c;
+}
+
+/* Main Header */
+.main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px; }
+.header-title h1 { margin: 0; font-size: 28px; color: var(--dark-blue); }
+.header-title p { margin: 5px 0 0; color: var(--text-color); }
+.header-actions { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+.search-bar-wrapper { position: relative; }
+.search-bar-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #aaa; }
+#note-search-input { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 15px 10px 40px; width: 250px; font-family: 'Poppins', sans-serif; transition: all 0.3s; }
+#note-search-input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 167, 157, 0.2); }
+
+/* Filter Controls */
+.filter-controls { display: flex; align-items: center; gap: 5px; background: var(--card-bg); padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border-color); }
+.date-filter { display: flex; align-items: center; gap: 5px; }
+.date-filter label { font-size: 14px; color: var(--text-color); cursor: pointer; }
+.date-filter input[type="date"] { border: none; background: transparent; padding: 5px; border-radius: 4px; color: var(--text-color); }
+.date-separator { color: #ccc; }
+.btn-icon { background: none; border: none; color: #aaa; cursor: pointer; padding: 5px; border-radius: 50%; width: 28px; height: 28px; }
+.btn-icon:hover { background: var(--light-gray); color: var(--dark-blue); cursor: pointer; }
+#add-note-btn { box-shadow: 0 4px 10px rgba(0,167,157,0.2); }
+
+/* Today's Reminders Section */
+.reminders-section { background: var(--card-bg); border-radius: 12px; padding: 20px; margin-bottom: 30px; border: 1px solid var(--border-color); }
+.reminders-section h2 { font-size: 18px; margin: 0 0 15px; color: var(--dark-blue); }
+.reminders-section h2 i { margin-right: 10px; color: var(--primary-color); }
+.reminders-list { display: flex; flex-wrap: wrap; gap: 15px; }
+.reminder-item { background: #e6f6f5; padding: 8px 15px; border-radius: 20px; font-size: 14px; color: var(--primary-color); font-weight: 500; }
+
+/* Main Page Layout */
+.notes-page-grid { display: grid; grid-template-columns: 1.8fr 1fr; gap: 30px; align-items: flex-start; }
+.section-header { margin-bottom: 20px; }
+.section-header h2 { font-size: 20px; color: var(--dark-blue); padding-bottom: 10px; border-bottom: 2px solid var(--light-gray); }
+.section-header h2 i { margin-right: 10px; color: var(--primary-color); }
+
+.notes-grid { display: flex; flex-direction: column; gap: 15px; margin-right: 20px; }
+.note-card { background: var(--card-bg); border-radius: 12px; box-shadow: none; border: 1px solid var(--border-color); padding: 20px; display: flex; align-items: center; gap: 20px; transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; width: 100%; }
+.note-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07); border-color: var(--primary-color); }
+.note-card-main { flex-grow: 1; overflow: hidden; }
+.note-title { font-size: 18px; margin: 0 0 5px 0; color: var(--dark-blue); font-weight: 600; }
+.note-title .fa-lock { font-size: 14px; margin-left: 8px; color: #aaa; }
+.note-content { color: var(--text-color); line-height: 1.6; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.note-card-footer { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 180px; }
+.note-date { font-size: 12px; color: #999; white-space: nowrap; }
+.note-actions { display: flex; gap: 5px; position: relative; }
+.note-action-btn { background: none; border: none; color: #aaa; font-size: 16px; cursor: pointer; width: 30px; height: 30px; border-radius: 50%; display:flex; align-items:center; justify-content:center; transition: background-color 0.2s, color 0.2s; }
+.note-action-btn:hover { background-color: var(--light-gray); color: var(--dark-blue); }
+.note-action-btn.starred { color: #f1c40f; }
+.dropdown-menu { display: none; position: absolute; top: 35px; right: 0; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); z-index: 10; overflow: hidden; width: 150px; }
+.dropdown-menu.show { display: block; }
+.dropdown-item { display: block; padding: 10px 15px; text-decoration: none; color: var(--text-color); font-size: 14px; cursor: pointer; }
+.dropdown-item:hover { background-color: var(--light-gray); }
+.dropdown-item i { margin-right: 10px; width: 15px; text-align: center; }
+
+.important-notes-list { display: flex; flex-direction: column; gap: 10px; }
+.important-note-item { background: var(--card-bg); padding: 15px; border-radius: 8px; color: var(--dark-blue); font-weight: 500; display: flex; align-items: center; border: 1px solid var(--border-color); transition: all 0.2s; cursor: pointer; }
+.important-note-item:hover { border-color: var(--primary-color); background: #e6f6f5; color: var(--primary-color); }
+.important-note-item i { color: #f1c40f; margin-right: 12px; }
+.lock-icon-sm { font-size: 12px; color: #aaa; margin-left: auto; padding-left: 10px; }
+
+/* Modal Styles */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+.modal-overlay.active { opacity: 1; visibility: visible; }
+.modal { background: #fff; padding: 30px; border-radius: 15px; width: 90%; max-width: 500px; position: relative; transform: scale(0.9); transition: transform 0.3s; }
+.modal-overlay.active .modal { transform: scale(1); }
+.modal-close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; }
+.modal h3 { margin-top: 0; margin-bottom: 25px; color: var(--dark-blue); }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; margin-bottom: 8px; font-weight: 500; }
+.form-group label i { margin-right: 8px; color: var(--primary-color); }
+.form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+.form-group textarea { resize: vertical; }
+.btn-full-width { width: 100%; padding: 12px; margin-top: 10px; }
+.view-modal .view-note-date { margin: -10px 0 20px; font-size: 14px; color: var(--text-color); }
+.view-modal .view-note-content { background: var(--light-gray); padding: 20px; border-radius: 8px; min-height: 200px; white-space: pre-wrap; line-height: 1.7; max-height: 40vh; overflow-y: auto; }
+.confirm-modal { max-width: 400px; text-align: center; }
+.confirm-modal .fa-exclamation-triangle { color: #f39c12; font-size: 24px; margin-bottom: 10px; }
+.confirm-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
+.btn-delete { background: var(--delete-color); color: #fff; }
+.btn-delete:hover { background: #c0392b; }
+.btn-secondary { background: var(--border-color); color: var(--dark-blue); }
+
+/* Empty State Professional Look */
+.empty-state { text-align: center; color: #aaa; padding: 40px 20px; border: 2px dashed var(--border-color); border-radius: 12px; }
+.empty-state i { font-size: 48px; margin-bottom: 15px; }
+.empty-state p { font-size: 16px; font-weight: 500; margin: 0; }
+.empty-message { text-align: center; color: #999; padding: 20px 0; }
+
+@media (max-width: 992px) { .notes-page-grid { grid-template-columns: 1fr; } .important-notes-section { order: -1; } }
+@media (max-width: 768px) { .main-header { flex-direction: column; align-items: stretch; } #note-search-input { width: 100%; } .note-card { flex-direction: column; align-items: stretch; } .note-card-footer { align-items: flex-start; } }
+#add-note-btn {
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 10px 20px;
+}
+#confirm-delete-btn{
+    padding: 10px;
+    border-radius: 5px;
+}
+#confirm-cancel-btn{
+    padding: 10px;
+    border-radius: 5px;
+}
+#confirm-cancel-btn, #confirm-delete-btn:hover {
+    cursor: pointer;
+    
+}

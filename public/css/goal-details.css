@@ -1,0 +1,41 @@
+/* public/css/goal-details.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #00A79D;
+    --dark-blue: #2c3e50;
+    --light-gray: #f4f7fa;
+    --text-color: #555;
+    --card-bg: #fff;
+    --border-color: #e0e0e0;
+    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.main-header { display: flex; align-items: center; gap: 20px; margin-bottom: 30px; }
+.back-link { color: var(--text-color); text-decoration: none; font-weight: 500; }
+.back-link:hover { color: var(--primary-color); }
+.header-title h1 { margin: 0; font-size: 28px; color: var(--dark-blue); }
+
+.goal-summary-card {
+    background-color: var(--card-bg);
+    border-radius: 15px;
+    padding: 30px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+.progress-info { display: flex; justify-content: space-between; font-size: 14px; color: var(--text-color); margin: 15px 0 5px; }
+.progress-bar-container { width: 100%; background-color: var(--light-gray); border-radius: 10px; height: 12px; overflow: hidden; }
+.progress-bar { height: 100%; background-color: var(--primary-color); border-radius: 10px; }
+.amount-info { display: flex; justify-content: space-between; font-weight: 600; font-size: 18px; margin-top: 10px; }
+.current-amount { color: var(--dark-blue); }
+.target-amount { color: var(--text-color); }
+
+.transactions-section { background: var(--card-bg); padding: 30px; border-radius: 15px; box-shadow: var(--shadow); }
+.transactions-section h2 { font-size: 20px; color: var(--dark-blue); margin: 0 0 20px; }
+.transactions-list { display: flex; flex-direction: column; gap: 10px; }
+.transaction-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); }
+.transaction-icon { width: 45px; height: 45px; min-width: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background-color: #e6f6f5; color: var(--primary-color); font-size: 20px; }
+.transaction-details { flex-grow: 1; }
+.transaction-details .description { font-weight: 500; color: var(--dark-blue); display: block; }
+.transaction-details .date { font-size: 14px; color: var(--text-color); }
+.transaction-amount { font-size: 16px; font-weight: 600; color: var(--primary-color); }

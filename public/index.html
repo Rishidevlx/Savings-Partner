@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started | Savings Partner</title>
+    <!-- Corrected Path for Stylesheet -->
+    <link rel="stylesheet" href="./css/style.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Toastify CSS for Professional Notifications -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <div class="slider-container">
+                <!-- Slide 1: Static Welcome Content -->
+                <div class="slide text-slide active">
+                    <div class="logo">
+                        <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="Savings Partner Logo">                 
+                    </div>
+                    <h1>Welcome to Savings Partner!</h1>
+                    <p>A community to track your savings, achieve your financial goals together.</p>
+                </div>
+                <!-- Slide 2: Background Image -->
+                <div class="slide image-slide" style="background-image: url('https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Slide_1-removebg-preview.png?updatedAt=1762282796166');"></div>
+                <!-- Slide 3: Background Image -->
+                <div class="slide image-slide" style="background-image: url('https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/slide_2_replace-removebg-preview.png?updatedAt=1762283459944');"></div>
+            </div>
+             <div class="slider-dots">
+                <span class="dot active"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+
+        <!-- Right Panel (Form) -->
+        <div class="right-panel">
+            <div class="form-wrapper">
+                <!-- Sign Up Form -->
+                <div id="signup-section" class="form-section active">
+                    <div class="form-header">
+                        <h2>Get Started</h2>
+                        <p>Already have an account? <a href="#" id="show-signin">Sign In</a></p>
+                    </div>
+                    <form id="signup-form" novalidate>
+                        <div class="input-group">
+                            <input type="text" id="fullname" name="fullname" required>
+                            <label for="fullname">Full Name</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="tel" id="phone" name="phone" required>
+                             <label for="phone">Phone Number</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="email" id="signup-email" name="email" required>
+                             <label for="signup-email">Email</label>
+                        </div>
+                        <div class="input-group password-group">
+                            <input type="password" id="signup-password" name="password" required>
+                            <label for="signup-password">Password</label>
+                            <i class="fas fa-eye-slash toggle-password"></i>
+                        </div>
+                         <div class="input-group password-group">
+                            <input type="password" id="confirm-password" name="confirm-password" required>
+                            <label for="confirm-password">Confirm Password</label>
+                            <i class="fas fa-eye-slash toggle-password"></i>
+                        </div>
+                        <button type="submit" class="btn-submit">Sign Up</button>
+                    </form>
+                </div>
+
+                <!-- Sign In Form (Initially Hidden) -->
+                 <div id="signin-section" class="form-section">
+                    <div class="form-header">
+                        <h2>Welcome Back!</h2>
+                        <p>Don't have an account? <a href="#" id="show-signup">Create account</a></p>
+                    </div>
+                    <form id="signin-form" novalidate>
+                        <div class="input-group">
+                            <input type="email" id="signin-email" name="email" required>
+                            <label for="signin-email">Email</label>
+                        </div>
+                        <div class="input-group password-group">
+                            <input type="password" id="signin-password" name="password" required>
+                            <label for="signin-password">Password</label>
+                            <i class="fas fa-eye-slash toggle-password"></i>
+                        </div>
+                        <button type="submit" class="btn-submit">Sign In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Just Validate Library -->
+    <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
+    <!-- Toastify JS for Professional Notifications -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <!-- Corrected Path for Script -->
+    <script src="./js/script.js"></script>
+</body>
+</html>

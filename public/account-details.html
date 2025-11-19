@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Details | Savings Partner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="stylesheet" href="./css/account-details.css"> 
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+    <!-- Mobile Menu Button -->
+    <button class="mobile-toggle" id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <div class="page-container">
+        <nav class="sidebar" id="sidebar">
+             <div class="sidebar-header">
+                <div class="logo">
+                     <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="SP Logo">
+                </div>
+                <span class="logo-text">Savings Partner</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="./dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+                <li><a href="./transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+                <li><a href="./goals.html"><i class="fas fa-bullseye"></i><span>Goals</span></a></li>
+                <li><a href="./connections.html"><i class="fas fa-users"></i><span>Connections</span></a></li>
+                <li><a href="notes.html"><i class="fas fa-sticky-note"></i><span>Notes</span></a></li>
+                <li><a href="calculator.html"><i class="fas fa-calculator"></i><span>Calculator</span></a></li>
+                <li><a href="accounts.html" class="active"><i class="fas fa-address-book"></i><span>Accounts</span></a></li>
+            </ul>
+            <ul class="sidebar-footer">
+                <li><a href="./settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+                <li><a href="/index.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-top">
+                    <a href="./accounts.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Accounts</a>
+                </div>
+                <div class="header-title">
+                    <h1 id="account-name-header">Loading...</h1>
+                </div>
+                <div class="header-controls">
+                    <div class="search-bar-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="ledger-search" placeholder="Search ledgers...">
+                    </div>
+                    <button class="btn btn-primary" id="add-ledger-btn"><i class="fas fa-plus"></i> New Ledger</button>
+                </div>
+            </header>
+
+            <div class="ledgers-grid" id="ledgers-grid"></div>
+        </main>
+    </div>
+
+    <!-- Add/Edit Ledger Modal -->
+    <div class="modal-overlay" id="ledger-modal-overlay">
+        <div class="modal">
+            <button class="modal-close-btn">&times;</button>
+            <h3 id="ledger-modal-title">Create New Ledger</h3>
+            <form id="ledger-form">
+                <div class="form-group">
+                    <label for="ledger-name">Ledger Name</label>
+                    <input type="text" id="ledger-name" name="name" required placeholder="e.g., November Sales">
+                </div>
+                <div class="form-group">
+                    <label for="ledger-date">Date</label>
+                    <input type="date" id="ledger-date" name="ledger_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full-width">Save Ledger</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Ledger Confirm Modal -->
+    <div class="modal-overlay" id="delete-ledger-confirm-modal">
+        <div class="modal confirm-modal">
+            <div style="text-align: center; margin-bottom: 15px;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 45px; color: #e74c3c;"></i>
+            </div>
+            <h3>Delete Ledger?</h3>
+            <p style="color: #555; margin-bottom: 25px;">This will permanently delete this ledger and all its entries. Continue?</p>
+            <div style="display: flex; justify-content: center; gap: 10px;">
+                <button class="btn" style="background: #f0f0f0; color: #333;" id="cancel-delete-ledger-btn">Cancel</button>
+                <button class="btn" style="background: #e74c3c; color: white;" id="confirm-delete-ledger-btn">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="./js/account-details.js"></script>
+</body>
+</html>

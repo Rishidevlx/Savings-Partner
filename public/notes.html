@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes | Savings Partner</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="stylesheet" href="./css/notes.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- MOBILE SIDEBAR FIX -->
+    <style>
+        @media (max-width: 768px) {
+            #mobile-toggle-btn {
+                display: flex !important;
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                z-index: 10001;
+                background: #00A79D;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+            #sidebar {
+                position: fixed !important;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 260px !important;
+                background-color: #2c3e50 !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease-in-out !important;
+                z-index: 10000 !important;
+                display: flex !important;
+                flex-direction: column;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            }
+            #sidebar.open {
+                transform: translateX(0) !important;
+            }
+            .close-sidebar-btn {
+                display: block !important;
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 28px;
+                cursor: pointer;
+                z-index: 10001;
+            }
+            .overlay-bg {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.6);
+                z-index: 9000;
+                backdrop-filter: blur(2px);
+            }
+            .overlay-bg.active { display: block !important; }
+            #sidebar .logo-text, 
+            #sidebar .sidebar-menu li a span, 
+            #sidebar .sidebar-footer li a span {
+                opacity: 1 !important;
+                visibility: visible !important;
+                display: inline-block !important;
+            }
+        }
+        .close-sidebar-btn { display: none; }
+        .overlay-bg { display: none; }
+    </style>
+</head>
+<body>
+     <button id="mobile-toggle-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+    <div class="overlay-bg" id="overlay-bg" onclick="closeSidebar()"></div>
+
+     <button class="mobile-toggle" id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="page-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+                 <button class="close-sidebar-btn" onclick="closeSidebar()">&times;</button>
+            <div class="sidebar-header">
+               <div class="logo">
+                     <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="SP Logo">
+                </div>
+                <span class="logo-text">Savings Partner</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="./dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+                <li><a href="./transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+                <li><a href="goals.html"><i class="fas fa-bullseye"></i><span>Goals</span></a></li>
+                <li><a href="connections.html"><i class="fas fa-users"></i><span>Connections</span></a></li>
+                <li><a href="./notes.html" class="active"><i class="fas fa-sticky-note"></i><span>Notes</span></a></li>
+                <li><a href="./calculator.html"><i class="fas fa-calculator"></i><span>Calculator</span></a></li>
+                <li><a href="accounts.html"><i class="fas fa-address-book"></i><span>Accounts</span></a></li>
+            </ul>
+            <ul class="sidebar-footer">
+                <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+                <li><a href="/index.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="main-header">
+                <div class="header-title">
+                    <h1>My Notes</h1>
+                    <p id="current-date-display"></p>
+                </div>
+                <div class="header-actions">
+                    <div class="filter-controls">
+                        <div class="date-filter">
+                            <label for="start-date"><i class="fas fa-calendar-alt"></i></label>
+                            <input type="date" id="start-date" title="Start Date">
+                        </div>
+                        <span class="date-separator">-</span>
+                        <div class="date-filter">
+                            <input type="date" id="end-date" title="End Date">
+                        </div>
+                         <button id="clear-filters-btn" class="btn-icon" title="Clear Filters"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div class="search-bar-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="note-search-input" placeholder="Search notes...">
+                    </div>
+                    <button class="btn btn-primary" id="add-note-btn"><i class="fas fa-plus"></i> New Note</button>
+                </div>
+            </header>
+
+            <section class="reminders-section">
+                <h2><i class="fas fa-bell"></i> Today's Reminders</h2>
+                <div class="reminders-list" id="reminders-list-container">
+                    <p class="empty-message">No reminders for today.</p>
+                </div>
+            </section>
+
+            <div class="notes-page-grid">
+                <section class="recent-notes-section">
+                    <div class="section-header">
+                        <h2><i class="fas fa-clipboard-list"></i> All Notes</h2>
+                    </div>
+                    <div class="notes-grid" id="notes-grid-container"></div>
+                </section>
+
+                <section class="important-notes-section">
+                     <div class="section-header">
+                        <h2><i class="fas fa-star"></i> Important</h2>
+                    </div>
+                    <div class="important-notes-list" id="important-notes-list-container"></div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal-overlay" id="note-modal-overlay">
+        <div class="modal"><button class="modal-close-btn" id="close-note-modal">&times;</button><h3 id="note-modal-title">Create a New Note</h3><form id="note-form"><div class="form-group"><label for="note-title-input"><i class="fas fa-heading"></i> Title</label><input type="text" id="note-title-input" placeholder="e.g., Q4 Financial Goals" required></div><div class="form-group"><label for="note-date-input"><i class="fas fa-calendar-alt"></i> Date to Remember</label><input type="date" id="note-date-input"></div><div class="form-group"><label for="note-content-input"><i class="fas fa-paragraph"></i> Content</label><textarea id="note-content-input" rows="8" placeholder="Start writing your thoughts..."></textarea></div><button type="submit" class="btn btn-primary btn-full-width"><i class="fas fa-save"></i> Save Note</button></form></div>
+    </div>
+     <div class="modal-overlay" id="view-note-modal-overlay">
+        <div class="modal view-modal"><button class="modal-close-btn" id="close-view-note-modal">&times;</button><h3 id="view-note-title">Note Title</h3><p class="view-note-date" id="view-note-date"></p><div class="view-note-content" id="view-note-content"></div></div>
+    </div>
+    <div class="modal-overlay" id="confirm-delete-modal-overlay">
+        <div class="modal confirm-modal"><h3><i class="fas fa-exclamation-triangle"></i> Are you sure?</h3><p>This note will be permanently deleted. This action cannot be undone.</p><div class="confirm-buttons"><button class="btn btn-secondary" id="confirm-cancel-btn">Cancel</button><button class="btn btn-delete" id="confirm-delete-btn">Delete</button></div></div>
+    </div>
+    <div class="modal-overlay" id="set-password-modal-overlay">
+        <div class="modal"><button class="modal-close-btn" id="close-set-password-modal">&times;</button><h3><i class="fas fa-lock"></i> Set a Password</h3><p>This will encrypt your note. You'll need this password to view or edit it.</p><form id="set-password-form"><div class="form-group"><label for="note-password">New Password</label><input type="password" id="note-password" required></div><div class="form-group"><label for="note-confirm-password">Confirm Password</label><input type="password" id="note-confirm-password" required></div><button type="submit" class="btn btn-primary btn-full-width">Set Password</button></form></div>
+    </div>
+    <div class="modal-overlay" id="verify-password-modal-overlay">
+        <div class="modal"><button class="modal-close-btn" id="close-verify-password-modal">&times;</button><h3><i class="fas fa-key"></i> Password Required</h3><p>Please enter the password for this note to continue.</p><form id="verify-password-form"><div class="form-group"><label for="note-verify-password">Password</label><input type="password" id="note-verify-password" required></div><button type="submit" class="btn btn-primary btn-full-width">Unlock Note</button></form></div>
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="./js/notes.js"></script>
+      <script>
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay-bg').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay-bg').classList.remove('active');
+        }
+    </script>
+    
+</body>
+</html>

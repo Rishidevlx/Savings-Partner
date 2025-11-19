@@ -1,0 +1,203 @@
+/* public/css/sidebar.css */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #00A79D;
+    --dark-blue: #2c3e50;
+    --light-gray: #f4f7fa;
+    --text-color: #555;
+    --sidebar-width-collapsed: 80px;
+    --sidebar-width-expanded: 250px;
+}
+
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-gray);
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+.page-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* --- MOBILE TOGGLE BUTTON (Visible only on Mobile) --- */
+.mobile-toggle {
+    display: none; /* Hidden on desktop */
+    position: fixed;
+    top: 15px;
+    right: 15px; /* Right side la irukum */
+    z-index: 4000; /* Ellathukum mela irukum */
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    width: 45px;
+    height: 45px;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- SIDEBAR STYLING (Desktop) --- */
+.sidebar {
+    width: var(--sidebar-width-collapsed);
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--dark-blue);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s ease;
+    z-index: 3000;
+    overflow: hidden;
+}
+
+@media (min-width: 769px) {
+    .sidebar:hover {
+        width: var(--sidebar-width-expanded);
+    }
+    .sidebar:hover .logo-text,
+    .sidebar:hover .sidebar-menu li a span,
+    .sidebar:hover .sidebar-footer li a span {
+        opacity: 1;
+        visibility: visible;
+    }
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    padding: 20px 25px;
+    height: 80px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+.sidebar-header .logo {
+    min-width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebar-header .logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.2);
+}
+
+.sidebar .logo-text,
+.sidebar-menu li a span,
+.sidebar-footer li a span {
+    opacity: 0;
+    visibility: hidden;
+    margin-left: 15px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+}
+
+.sidebar-menu, .sidebar-footer {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+}
+
+.sidebar-menu { flex-grow: 1; }
+
+.sidebar-menu li a, .sidebar-footer li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 25px;
+    color: #bdc3c7;
+    text-decoration: none;
+    height: 55px;
+    box-sizing: border-box;
+    transition: background 0.2s;
+}
+
+.sidebar-menu li a:hover, .sidebar-footer li a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+.sidebar-menu li a.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-left: 4px solid #fff;
+}
+
+.sidebar-menu li a i, .sidebar-footer li a i {
+    font-size: 20px;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Main Content Layout */
+.main-content {
+    margin-left: var(--sidebar-width-collapsed);
+    width: calc(100% - var(--sidebar-width-collapsed));
+    padding: 30px;
+    transition: margin-left 0.3s ease;
+    box-sizing: border-box;
+}
+
+/* --- MOBILE FIXES (IMPORTANT) --- */
+@media (max-width: 768px) {
+    .mobile-toggle {
+        display: flex !important;
+    }
+
+    .sidebar {
+        width: 250px !important; /* Fixed Width */
+        height: 100vh !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: translateX(-100%); /* Hidden Left */
+        transition: transform 0.3s ease-in-out !important;
+        box-shadow: none;
+        z-index: 3500 !important;
+    }
+
+    /* Active State - Slided In */
+    .sidebar.active {
+        transform: translateX(0) !important;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.5) !important;
+    }
+
+    /* Show text always on mobile */
+    .sidebar .logo-text,
+    .sidebar-menu li a span,
+    .sidebar-footer li a span {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+
+    .main-content {
+        margin-left: 0 !important; /* Reset margin */
+        width: 100% !important;
+        padding: 20px 15px !important;
+        padding-top: 80px !important; /* Space for button */
+    }
+    
+    /* Backdrop Overlay */
+    .sidebar.active + .main-content::before {
+        content: '';
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 3000;
+    }
+}

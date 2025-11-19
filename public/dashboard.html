@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Savings Partner</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="./css/sidebar.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+     <button class="mobile-toggle" id="sidebar-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="page-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                     <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="SP Logo">
+                </div>
+                <span class="logo-text">Savings Partner</span>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="#" class="active"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
+                <li><a href="transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
+                <li><a href="goals.html"><i class="fas fa-bullseye"></i><span>Goals</span></a></li>
+                <li><a href="connections.html"><i class="fas fa-users"></i><span>Connections</span></a></li>
+                <li><a href="notes.html"><i class="fas fa-sticky-note"></i><span>Notes</span></a></li>
+                <li><a href="calculator.html"><i class="fas fa-calculator"></i><span>Calculator</span></a></li>
+                <li><a href="accounts.html"><i class="fas fa-address-book"></i><span>Accounts</span></a></li>
+            </ul>
+            <ul class="sidebar-footer">
+                <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+                <li><a href="/index.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="welcome-message">
+                    <h1>Welcome Back! 👋</h1>
+                    <p>Here's your financial overview for today.</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" id="show-cid-modal">Your CID</button>
+                    <button class="btn btn-primary" id="show-connect-modal">+ Connections</button>
+                </div>
+            </header>
+
+            <!-- Stats Cards -->
+            <section class="stats-cards">
+                <div class="card">
+                    <div class="card-icon" style="background-color: #e6f6f5;"><i class="fas fa-wallet" style="color: #00A79D;"></i></div>
+                    <div class="card-info">
+                        <span class="card-title">Total Balance</span>
+                        <span class="card-value" id="total-balance">₹0</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background-color: #e8f5e9;"><i class="fas fa-arrow-up" style="color: #4CAF50;"></i></div>
+                    <div class="card-info">
+                        <span class="card-title">Monthly Income</span>
+                        <span class="card-value" id="monthly-income">₹0</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background-color: #fff3e0;"><i class="fas fa-arrow-down" style="color: #ff9800;"></i></div>
+                    <div class="card-info">
+                        <span class="card-title">Monthly Expenses</span>
+                        <span class="card-value" id="monthly-expense">₹0</span>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-icon" style="background-color: #e3f2fd;"><i class="fas fa-tasks" style="color: #2196F3;"></i></div>
+                    <div class="card-info">
+                        <span class="card-title">Active Goals</span>
+                        <span class="card-value" id="active-goals">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Body Content -->
+            <section class="main-body">
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h2>Quick Actions</h2>
+                    <div class="action-cards" id="quick-action-cards">
+                        <div class="action-card" data-href="transactions.html"><i class="fas fa-exchange-alt"></i><span>Transactions</span></div>
+                        <div class="action-card" data-href="goals.html"><i class="fas fa-bullseye"></i><span>Goals</span></div>
+                        <div class="action-card" data-href="connections.html"><i class="fas fa-users"></i><span>Connections</span></div>
+                        <div class="action-card" data-href="calculator.html"><i class="fas fa-calculator"></i><span>Calculator</span></div>
+                    </div>
+                </div>
+
+                <!-- Connection Requests -->
+                <div class="connection-requests">
+                    <h2>Connection Requests</h2>
+                    <div class="request-list" id="connection-requests-list">
+                        <!-- Requests will be loaded by JS -->
+                        <p class="empty-message">No new connection requests.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modals (Pop-ups) -->
+    <div class="modal-overlay" id="cid-modal-overlay">
+        <div class="modal">
+            <button class="modal-close-btn" id="close-cid-modal">&times;</button>
+            <h3>Your Connection ID</h3>
+            <p>Share this ID with friends to connect and create shared goals.</p>
+            <div class="cid-display" id="cid-text">Loading...</div>
+            <button class="btn btn-primary" id="copy-cid-btn"><i class="fas fa-copy"></i> Copy CID</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="connect-modal-overlay">
+        <div class="modal">
+            <button class="modal-close-btn" id="close-connect-modal">&times;</button>
+            <h3>Send Connection Request</h3>
+            <form id="add-connection-form">
+                <div class="form-group">
+                    <label for="cid-input">Enter the CID of the person you want to connect with.</label>
+                    <input type="text" id="cid-input" placeholder="e.g., USERNAME_1234" class="modal-input" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Find User</button>
+            </form>
+            <div id="found-user-container" class="hidden"></div>
+        </div>
+    </div>
+    
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="./js/main.js"></script>
+</body>
+</html>
