@@ -1,7 +1,7 @@
 // public/js/admin.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000/api';
+    const API_URL = '/api';
     const user = JSON.parse(localStorage.getItem('user'));
 
     // Verify Admin

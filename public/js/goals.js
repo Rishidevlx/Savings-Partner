@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000/api/goals';
+    const API_URL = '/api/goals';
 
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {

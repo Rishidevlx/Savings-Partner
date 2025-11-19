@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const API_URL = 'http://localhost:3000/api';
+    const API_URL = '/api';
     
     const user = JSON.parse(localStorage.getItem('user'));
     const CURRENT_USER_ID = user ? user.id : null;

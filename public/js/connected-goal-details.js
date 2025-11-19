@@ -1,7 +1,7 @@
 // public/js/connected-goal-details.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000/api/connected-goals';
+    const API_URL = '/api/connected-goals';
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
         window.location.href = '/index.html';

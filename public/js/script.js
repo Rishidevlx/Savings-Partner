@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- API & Validation ---
-    const API_URL = 'http://localhost:3000';
+    const API_URL = '';
 
     const showToast = (message, type = 'success') => {
         Toastify({

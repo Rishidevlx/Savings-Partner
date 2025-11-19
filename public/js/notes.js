@@ -1,7 +1,7 @@
 // public/js/notes.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    const API_URL = 'http://localhost:3000/api/notes';
+    const API_URL = '/api/notes';
     
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
