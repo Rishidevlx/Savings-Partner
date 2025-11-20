@@ -1,74 +1,72 @@
-// public/js/main.js
+// --- 1. GLOBAL LOGOUT FUNCTION (MUST BE AT THE TOP) ---
+// Idhu window object-la direct-a irukum, so eppo venaalum work aagum.
+window.logoutApp = function() {
+    console.log("Logging out...");
 
-// GLOBAL LOGOUT FUNCTION (Direct Access)
-window.logout = function() {
-    // 1. Clear User Data
+    // A. Clear All Local Data
     localStorage.removeItem('user');
-    localStorage.clear(); // Clear everything to be safe
+    localStorage.clear();
+    sessionStorage.clear();
 
-    // 2. Unregister Service Worker (Fix for PWA Cache issues)
+    // B. Unregister Service Worker (Fix for PWA Cache issues)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
             for(let registration of registrations) {
                 registration.unregister();
+                console.log("Service Worker Unregistered");
             }
         });
     }
 
-    // 3. Force Redirect to Login
-    window.location.href = '/index.html';
+    // C. Force Redirect with Timestamp (Cache Busting)
+    // '?t=' + time add panradhala browser idha puthu page-a nenaichu fresh-a load pannum
+    window.location.replace('/index.html?t=' + new Date().getTime());
 };
-    // ... (Unga pazhaya code inga thodangattum) ...
+
+// --- DOM LOADED EVENT ---
 document.addEventListener('DOMContentLoaded', () => {
 
-    const API_URL = '/api';
+    // Vercel & Localhost Support
+    const API_URL = '/api'; 
     
     const user = JSON.parse(localStorage.getItem('user'));
     const CURRENT_USER_ID = user ? user.id : null;
 
-    // --- 1. STRICT LOGOUT LOGIC (FIXED) ---
-    // Using ID Selector for 100% accuracy
-    const logoutBtn = document.getElementById('logout-btn');
-
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Link vela seiya vidama thadukkurom
-            e.stopPropagation();
-            
-            // Clear Data Completely
-            localStorage.removeItem('user');
-            localStorage.clear(); // Safe side, clear everything
-            
-            // Force Redirect to Login
-            window.location.replace('/index.html');
-        });
+    // --- 2. PAGE ACCESS CONTROL (SECURITY) ---
+    // User illana, Login page-ku thurathidum (Except index.html)
+    if (!user && !window.location.pathname.endsWith('index.html') && window.location.pathname !== '/') {
+        window.location.replace('/index.html');
+        return; // Stop executing further code
     }
-    // ---------------------------------------
 
-    // --- 2. MOBILE SIDEBAR TOGGLE (Universal Fix) ---
+    // --- 3. MOBILE SIDEBAR TOGGLE (Universal Fix) ---
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay-bg') || document.querySelector('.overlay-bg');
+    // Support both ID and Class for Overlay
+    const overlay = document.getElementById('overlay-bg') || document.querySelector('.overlay-bg'); 
+    const closeBtn = document.querySelector('.close-sidebar-btn');
 
     if (sidebarToggle && sidebar) {
+        // Open Sidebar
         sidebarToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             sidebar.classList.add('active');
-            sidebar.classList.add('open');
+            sidebar.classList.add('open'); // Support both CSS styles
             if(overlay) overlay.classList.add('active');
         });
 
+        // Close Function
         const closeMenu = () => {
             sidebar.classList.remove('active');
             sidebar.classList.remove('open');
             if(overlay) overlay.classList.remove('active');
         };
 
+        // Close Events
         if(overlay) overlay.addEventListener('click', closeMenu);
-
-        const closeBtn = document.querySelector('.close-sidebar-btn');
         if(closeBtn) closeBtn.addEventListener('click', closeMenu);
 
+        // Close when clicking outside
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && 
                 (sidebar.classList.contains('active') || sidebar.classList.contains('open')) && 
@@ -79,163 +77,103 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 4. HELPER FUNCTIONS ---
     const showToast = (message, type = 'success') => {
-        Toastify({ text: message, duration: 3000, gravity: "top", position: "right", stopOnFocus: true, style: { background: type === 'success' ? "linear-gradient(to right, #00A79D, #00b09b)" : "linear-gradient(to right, #e74c3c, #ff5f6d)" } }).showToast();
+        if (typeof Toastify === 'function') {
+            Toastify({ 
+                text: message, 
+                duration: 3000, 
+                gravity: "top", 
+                position: "right", 
+                stopOnFocus: true, 
+                style: { background: type === 'success' ? "linear-gradient(to right, #00A79D, #00b09b)" : "linear-gradient(to right, #e74c3c, #ff5f6d)" } 
+            }).showToast();
+        } else {
+            console.log(message); // Fallback if Toastify not loaded
+        }
     };
 
     const fetchApi = async (url, options = {}) => {
         try {
             const response = await fetch(url, options);
             if (!response.ok) {
-                let errorMsg = `Error: ${response.status} ${response.statusText}`;
-                try { const errorData = await response.json(); errorMsg = errorData.message || errorMsg; } catch (jsonError) {}
-                throw new Error(errorMsg);
+                // Handle 401 Unauthorized (Session Expired)
+                if (response.status === 401) {
+                    window.logoutApp();
+                    return;
+                }
+                throw new Error('API Error');
             }
-            if (response.status === 204 || (response.status === 200 && response.headers.get('content-length') === '0')) {
-                 return;
-            }
+            if (response.status === 204) return;
             return response.json();
-        } catch (error) { showToast(error.message, 'error'); throw error; }
+        } catch (error) { 
+            showToast(error.message || "Something went wrong", 'error'); 
+            throw error; 
+        }
     };
 
-    // --- PAGE ROUTING LOGIC ---
+    // --- 5. INITIALIZE PAGES ---
+    // Check which page is currently active
     if (document.querySelector('.welcome-message')) {
-        if (!user) { window.location.href = '/index.html'; return; }
         initDashboardPage();
     } else if (document.getElementById('transactions-container')) {
-        if (!user) { window.location.href = '/index.html'; return; }
         initTransactionsPage();
     } else if (document.querySelector('.calculator-grid')) {
-        if (!user) { window.location.href = '/index.html'; return; }
         initCalculatorPage();
     }
 
-    // --- DASHBOARD PAGE LOGIC ---
+    // --- DASHBOARD LOGIC ---
     function initDashboardPage() {
-        const formatCurrency = (amount) => `₹${parseFloat(amount).toLocaleString('en-IN')}`;
+        const formatCurrency = (amount) => `₹${parseFloat(amount || 0).toLocaleString('en-IN')}`;
 
         const fetchDashboardStats = async () => {
             try {
                 const stats = await fetchApi(`${API_URL}/dashboard/stats?userId=${CURRENT_USER_ID}`);
-                document.getElementById('total-balance').textContent = formatCurrency(stats.totalBalance);
-                document.getElementById('monthly-income').textContent = formatCurrency(stats.monthlyIncome);
-                document.getElementById('monthly-expense').textContent = formatCurrency(stats.monthlyExpense);
-                document.getElementById('active-goals').textContent = stats.activeGoals;
-            } catch (error) { console.error("Failed to fetch dashboard stats", error); }
-        };
-
-        const fetchDashboardConnectionRequests = async () => {
-            const listContainer = document.getElementById('connection-requests-list');
-            try {
-                const requests = await fetchApi(`${API_URL}/connections/requests?userId=${CURRENT_USER_ID}`);
-                listContainer.innerHTML = ''; 
-                if (requests.length === 0) {
-                    listContainer.innerHTML = '<p class="empty-message">No new connection requests.</p>';
-                    return;
+                if (stats) {
+                    document.getElementById('total-balance').textContent = formatCurrency(stats.totalBalance);
+                    document.getElementById('monthly-income').textContent = formatCurrency(stats.monthlyIncome);
+                    document.getElementById('monthly-expense').textContent = formatCurrency(stats.monthlyExpense);
+                    document.getElementById('active-goals').textContent = stats.activeGoals;
                 }
-                requests.forEach(req => {
-                    const item = document.createElement('div');
-                    item.className = 'request-item';
-                    item.dataset.requestId = req.id;
-                    item.innerHTML = `
-                        <div class="request-info">
-                            <span>${req.fullname}</span>
-                            <small>${req.cid}</small>
-                        </div>
-                        <div class="request-actions">
-                            <button class="btn-accept">Accept</button>
-                            <button class="btn-reject">Reject</button>
-                        </div>
-                    `;
-                    listContainer.appendChild(item);
-                });
-            } catch (error) {
-                listContainer.innerHTML = '<p class="empty-message">Could not load requests.</p>';
-            }
+            } catch (error) { console.error("Stats Error", error); }
         };
         
         const welcomeHeader = document.querySelector('.welcome-message h1');
-        if (welcomeHeader && user.fullname) {
+        if (welcomeHeader && user && user.fullname) {
             welcomeHeader.innerHTML = `Welcome Back, ${user.fullname.split(' ')[0]}! 👋`;
         }
-        
+
+        const cidText = document.getElementById('cid-text');
+        if (cidText && user && user.cid) cidText.textContent = user.cid;
+
+        // Copy CID
+        const copyBtn = document.getElementById('copy-cid-btn');
+        if(copyBtn) {
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(cidText.innerText)
+                    .then(() => showToast('CID copied successfully!'));
+            });
+        }
+
+        // Modals
         const setupModal = (openBtnId, closeBtnId, overlayId) => {
             const openBtn = document.getElementById(openBtnId);
             const closeBtn = document.getElementById(closeBtnId);
             const overlay = document.getElementById(overlayId);
-            if (openBtn) openBtn.addEventListener('click', () => overlay.classList.add('active'));
-            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+            if (openBtn && overlay) openBtn.addEventListener('click', () => overlay.classList.add('active'));
+            if (closeBtn && overlay) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
             if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
         }
 
         setupModal('show-cid-modal', 'close-cid-modal', 'cid-modal-overlay');
         setupModal('show-connect-modal', 'close-connect-modal', 'connect-modal-overlay');
 
-        const cidText = document.getElementById('cid-text');
-        if (cidText && user.cid) {
-             cidText.textContent = user.cid;
-        }
-
-        document.getElementById('copy-cid-btn').addEventListener('click', () => {
-            navigator.clipboard.writeText(cidText.innerText)
-                .then(() => showToast('CID copied successfully!'))
-                .catch(err => showToast('Failed to copy CID.', 'error'));
-        });
-
-        document.getElementById('add-connection-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const cidInput = document.getElementById('cid-input');
-            const foundUserContainer = document.getElementById('found-user-container');
-            if (!cidInput.value) return;
-
-            try {
-                const foundUser = await fetchApi(`${API_URL}/connections/find-user`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: cidInput.value, requesterId: CURRENT_USER_ID }) });
-                foundUserContainer.classList.remove('hidden');
-                foundUserContainer.innerHTML = `<div class="request-item" style="padding: 10px 0;"><div class="request-info"><span>${foundUser.fullname}</span><small>${foundUser.cid}</small></div><button class="btn-accept" id="send-request-btn">Send Request</button></div>`;
-                
-                document.getElementById('send-request-btn').addEventListener('click', async () => {
-                    await fetchApi(`${API_URL}/connections/request`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requesterId: CURRENT_USER_ID, recipientId: foundUser.id }) });
-                    showToast(`Request sent to ${foundUser.fullname}!`);
-                    document.getElementById('connect-modal-overlay').classList.remove('active');
-                    foundUserContainer.classList.add('hidden');
-                    cidInput.value = '';
-                });
-
-            } catch(error) {
-                foundUserContainer.classList.remove('hidden');
-                foundUserContainer.innerHTML = `<p style="color: var(--danger-color);">${error.message}</p>`;
-            }
-        });
-
-        document.getElementById('connection-requests-list').addEventListener('click', async (e) => {
-            const target = e.target;
-            const requestItem = target.closest('.request-item');
-            if (!requestItem) return;
-            const requestId = requestItem.dataset.requestId;
-            const action = target.classList.contains('btn-accept') ? 'accept' : target.classList.contains('btn-reject') ? 'decline' : null;
-            if (action) {
-                try {
-                    await fetchApi(`${API_URL}/connections/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: CURRENT_USER_ID, requestId }) });
-                    showToast(`Request ${action}ed!`);
-                    fetchDashboardConnectionRequests(); 
-                } catch(err) {}
-            }
-        });
-        
-        document.getElementById('quick-action-cards').addEventListener('click', (e) => {
-            const card = e.target.closest('.action-card');
-            if (card && card.dataset.href) {
-                window.location.href = card.dataset.href;
-            }
-        });
-
         fetchDashboardStats();
-        fetchDashboardConnectionRequests();
     }
 
-    // --- TRANSACTIONS PAGE LOGIC ---
+    // --- TRANSACTIONS LOGIC ---
     function initTransactionsPage() {
-        const { jsPDF } = window.jspdf;
+        const { jsPDF } = window.jspdf || {}; // Safe check
         const listContainer = document.getElementById('transactions-list-container');
         const addTransactionForm = document.getElementById('transaction-form');
         const bulkSelectBtn = document.getElementById('bulk-select-btn');
@@ -252,16 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentFilters = { type: 'all', search: '', startDate: '', endDate: '' }; 
         let allTransactions = [];
+        let searchTimeout;
         
-        const setupModal = (openBtnId, closeBtnId, overlayId) => {
-            const openBtn = document.getElementById(openBtnId);
-            const closeBtn = document.getElementById(closeBtnId);
-            const overlay = document.getElementById(overlayId);
-            if (openBtn) openBtn.addEventListener('click', () => overlay.classList.add('active'));
-            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        // Setup Modal manually since it's reused
+        const transModal = document.getElementById('transaction-modal-overlay');
+        if(document.getElementById('add-transaction-btn')) {
+            document.getElementById('add-transaction-btn').addEventListener('click', () => transModal.classList.add('active'));
+        }
+        if(document.getElementById('close-transaction-modal')) {
+            document.getElementById('close-transaction-modal').addEventListener('click', () => transModal.classList.remove('active'));
         }
 
+        // Delete Modal
         const confirmModal = document.getElementById('confirm-modal-overlay');
         const confirmTitle = document.querySelector('#confirm-modal-overlay h3');
         const confirmText = document.getElementById('confirm-modal-text');
@@ -269,18 +209,21 @@ document.addEventListener('DOMContentLoaded', () => {
         const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
 
         const showConfirmationModal = (title, text, onConfirm) => {
-            confirmTitle.textContent = title;
-            confirmText.textContent = text;
+            if(confirmTitle) confirmTitle.textContent = title;
+            if(confirmText) confirmText.textContent = text;
             confirmModal.classList.add('active');
-            const newConfirmActionBtn = confirmActionBtn.cloneNode(true);
-            confirmActionBtn.parentNode.replaceChild(newConfirmActionBtn, confirmActionBtn);
-            newConfirmActionBtn.addEventListener('click', () => {
+            
+            // Remove old listeners to prevent duplicates
+            const newBtn = confirmActionBtn.cloneNode(true);
+            confirmActionBtn.parentNode.replaceChild(newBtn, confirmActionBtn);
+            
+            newBtn.addEventListener('click', () => {
                 onConfirm();
                 confirmModal.classList.remove('active');
             });
         };
-        confirmCancelBtn.addEventListener('click', () => confirmModal.classList.remove('active'));
-        
+        if(confirmCancelBtn) confirmCancelBtn.addEventListener('click', () => confirmModal.classList.remove('active'));
+
         const fetchAndRenderTransactions = async () => {
             let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&type=${currentFilters.type}&days=all`; 
             if (currentFilters.search) url += `&search=${encodeURIComponent(currentFilters.search)}`;
@@ -288,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 let transactions = await fetchApi(url);
                 
-                if (currentFilters.startDate && currentFilters.endDate) {
+                if (transactions && currentFilters.startDate && currentFilters.endDate) {
                     const start = new Date(currentFilters.startDate);
                     const end = new Date(currentFilters.endDate);
                     end.setHours(23, 59, 59, 999);
@@ -299,9 +242,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                allTransactions = transactions;
-                renderTransactionList(transactions);
-                updateStatsCards(transactions);
+                allTransactions = transactions || [];
+                renderTransactionList(allTransactions);
+                updateStatsCards(allTransactions);
             } catch (error) { }
         };
 
@@ -350,40 +293,45 @@ document.addEventListener('DOMContentLoaded', () => {
             netBalanceEl.textContent = `₹${(totalIncome - totalExpense).toLocaleString('en-IN')}`;
         };
 
-        addTransactionForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const data = { ...Object.fromEntries(new FormData(addTransactionForm).entries()), userId: CURRENT_USER_ID };
-            const options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
-            try {
-                await fetchApi(`${API_URL}/transactions`, options);
-                showToast('Transaction added!');
-                addTransactionForm.reset();
-                document.getElementById('transaction-modal-overlay').classList.remove('active');
-                fetchAndRenderTransactions();
-            } catch (error) { }
-        });
+        if(addTransactionForm) {
+            addTransactionForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const data = { ...Object.fromEntries(new FormData(addTransactionForm).entries()), userId: CURRENT_USER_ID };
+                const options = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
+                try {
+                    await fetchApi(`${API_URL}/transactions`, options);
+                    showToast('Transaction added!');
+                    addTransactionForm.reset();
+                    transModal.classList.remove('active');
+                    fetchAndRenderTransactions();
+                } catch (error) { }
+            });
+        }
 
-        let searchTimeout;
-        searchInput.addEventListener('input', () => {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                currentFilters.search = searchInput.value;
-                fetchAndRenderTransactions();
-            }, 300);
-        });
+        if(searchInput) {
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    currentFilters.search = searchInput.value;
+                    fetchAndRenderTransactions();
+                }, 300);
+            });
+        }
 
-        document.querySelector('.filter-tabs').addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-btn')) {
-                document.querySelectorAll('.filter-tabs .filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                currentFilters.type = e.target.dataset.filter;
+        // Filters & Buttons logic...
+        const filterTabs = document.querySelectorAll('.filter-btn');
+        filterTabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterTabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentFilters.type = btn.dataset.filter;
                 fetchAndRenderTransactions();
-            }
+            });
         });
         
-        startDateInput.addEventListener('change', () => { currentFilters.startDate = startDateInput.value; fetchAndRenderTransactions(); });
-        endDateInput.addEventListener('change', () => { currentFilters.endDate = endDateInput.value; fetchAndRenderTransactions(); });
-        clearFiltersBtn.addEventListener('click', () => {
+        if(startDateInput) startDateInput.addEventListener('change', () => { currentFilters.startDate = startDateInput.value; fetchAndRenderTransactions(); });
+        if(endDateInput) endDateInput.addEventListener('change', () => { currentFilters.endDate = endDateInput.value; fetchAndRenderTransactions(); });
+        if(clearFiltersBtn) clearFiltersBtn.addEventListener('click', () => {
             startDateInput.value = '';
             endDateInput.value = '';
             currentFilters.startDate = '';
@@ -391,48 +339,53 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndRenderTransactions();
         });
 
-        bulkSelectBtn.addEventListener('click', () => {
-            transactionsContainer.classList.toggle('select-mode'); 
-            const isSelectMode = transactionsContainer.classList.contains('select-mode');
-            bulkSelectBtn.innerHTML = isSelectMode ? '<i class="fas fa-times"></i> Cancel' : '<i class="fas fa-check-double"></i> Select';
-            deleteSelectedBtn.classList.toggle('hidden', !isSelectMode);
-            if (!isSelectMode) {
-                document.querySelectorAll('.transaction-checkbox').forEach(cb => cb.checked = false);
-            }
-        });
-
-        deleteSelectedBtn.addEventListener('click', () => {
-            const idsToDelete = Array.from(document.querySelectorAll('.transaction-checkbox:checked')).map(cb => cb.dataset.id);
-            if (idsToDelete.length === 0) return showToast('Please select transactions.', 'error');
-            
-            showConfirmationModal('Delete Transactions?', `Delete ${idsToDelete.length} transaction(s)?`, async () => {
-                const options = { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: CURRENT_USER_ID, ids: idsToDelete }) };
-                try {
-                    await fetchApi(`${API_URL}/transactions`, options);
-                    showToast('Deleted successfully');
-                    fetchAndRenderTransactions();
-                    transactionsContainer.classList.remove('select-mode');
-                    deleteSelectedBtn.classList.add('hidden');
-                    bulkSelectBtn.innerHTML = '<i class="fas fa-check-double"></i> Select';
-                } catch (error) { }
+        if(bulkSelectBtn) {
+            bulkSelectBtn.addEventListener('click', () => {
+                transactionsContainer.classList.toggle('select-mode'); 
+                const isSelectMode = transactionsContainer.classList.contains('select-mode');
+                bulkSelectBtn.innerHTML = isSelectMode ? '<i class="fas fa-times"></i> Cancel' : '<i class="fas fa-check-double"></i> Select';
+                deleteSelectedBtn.classList.toggle('hidden', !isSelectMode);
+                if (!isSelectMode) {
+                    document.querySelectorAll('.transaction-checkbox').forEach(cb => cb.checked = false);
+                }
             });
-        });
+        }
 
-        downloadBtn.addEventListener('click', () => {
-            if (allTransactions.length === 0) { showToast('No transactions to download.', 'error'); return; }
-            const doc = new jsPDF();
-            doc.setFontSize(18); doc.text("Transaction Report", 14, 22); doc.setFontSize(11); doc.setTextColor(100);
-            const tableColumn = ["Date", "Category", "Description", "Type", "Amount (INR)"];
-            const tableRows = [];
-            allTransactions.forEach(item => {
-                tableRows.push([ new Date(item.transaction_date).toLocaleDateString("en-GB"), item.category, item.description || "-", item.type.charAt(0).toUpperCase() + item.type.slice(1), item.amount ]);
+        if(deleteSelectedBtn) {
+            deleteSelectedBtn.addEventListener('click', () => {
+                const idsToDelete = Array.from(document.querySelectorAll('.transaction-checkbox:checked')).map(cb => cb.dataset.id);
+                if (idsToDelete.length === 0) return showToast('Please select transactions.', 'error');
+                
+                showConfirmationModal('Delete Transactions?', `Delete ${idsToDelete.length} transaction(s)?`, async () => {
+                    const options = { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: CURRENT_USER_ID, ids: idsToDelete }) };
+                    try {
+                        await fetchApi(`${API_URL}/transactions`, options);
+                        showToast('Deleted successfully');
+                        fetchAndRenderTransactions();
+                        transactionsContainer.classList.remove('select-mode');
+                        deleteSelectedBtn.classList.add('hidden');
+                        bulkSelectBtn.innerHTML = '<i class="fas fa-check-double"></i> Select';
+                    } catch (error) { }
+                });
             });
-            doc.autoTable(tableColumn, tableRows, { startY: 30 });
-            doc.save(`transactions_${new Date().toISOString().split('T')[0]}.pdf`);
-            showToast("Downloaded!");
-        });
+        }
+
+        if(downloadBtn && jsPDF) {
+            downloadBtn.addEventListener('click', () => {
+                if (allTransactions.length === 0) { showToast('No transactions to download.', 'error'); return; }
+                const doc = new jsPDF();
+                doc.setFontSize(18); doc.text("Transaction Report", 14, 22); doc.setFontSize(11); doc.setTextColor(100);
+                const tableColumn = ["Date", "Category", "Description", "Type", "Amount (INR)"];
+                const tableRows = [];
+                allTransactions.forEach(item => {
+                    tableRows.push([ new Date(item.transaction_date).toLocaleDateString("en-GB"), item.category, item.description || "-", item.type.charAt(0).toUpperCase() + item.type.slice(1), item.amount ]);
+                });
+                doc.autoTable(tableColumn, tableRows, { startY: 30 });
+                doc.save(`transactions_${new Date().toISOString().split('T')[0]}.pdf`);
+                showToast("Downloaded!");
+            });
+        }
         
-        setupModal('add-transaction-btn', 'close-transaction-modal', 'transaction-modal-overlay');
         document.getElementById('date').valueAsDate = new Date();
         fetchAndRenderTransactions();
     }
@@ -490,7 +443,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         
         const handleClear = () => { state = { currentValue: '0', previousValue: null, operator: null, waitingForOperand: false }; };
-
         const handleBackspace = () => {
             if (state.currentValue === 'Error' || state.waitingForOperand) return;
             state.currentValue = state.currentValue.length > 1 ? state.currentValue.slice(0, -1) : '0';
@@ -500,55 +452,57 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!Number.isFinite(result)) return;
             const li = document.createElement('li');
             li.innerHTML = `${expression} = <span>${parseFloat(result.toPrecision(12))}</span>`;
-            historyList.prepend(li);
+            if(historyList) historyList.prepend(li);
         };
 
-        keys.addEventListener('click', e => {
-            if (!e.target.matches('button')) return;
-            const action = e.target.dataset.action;
-            const keyContent = e.target.textContent;
-            if (!action) handleInput(keyContent);
-            else if (action === 'operator') handleInput(keyContent);
-            else if (action === 'decimal') handleInput('.');
-            else if (action === 'clear') handleClear();
-            else if (action === 'backspace') handleBackspace();
-            else if (action === 'calculate') handleCalculate();
-            updateDisplay();
-        });
-
-        const listContainer = document.getElementById('recent-transactions-list');
-        const filterTabs = document.getElementById('recent-transactions-filter');
-        const getCategoryIconCal = (category) => ({ 'Salary': 'briefcase', 'Food': 'utensils', 'Transport': 'car', 'Shopping': 'shopping-bag', 'Bills': 'file-invoice-dollar', 'Other': 'receipt' }[category] || 'receipt');
-
-        const renderRecentTransactions = (transactions) => {
-            listContainer.innerHTML = '';
-            if (transactions.length === 0) {
-                listContainer.innerHTML = '<p style="text-align: center; color: #777;">No transactions in the last 30 days.</p>';
-                return;
-            }
-            transactions.forEach(t => {
-                const item = document.createElement('div');
-                item.className = `transaction-item ${t.type}`;
-                item.innerHTML = `<div class="transaction-icon"><i class="fas fa-${getCategoryIconCal(t.category)}"></i></div><div class="transaction-details"><span class="category">${t.category}</span><span class="description">${new Date(t.transaction_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span></div><div class="transaction-amount">${t.type === 'income' ? '+' : '-'} ₹${parseFloat(t.amount).toLocaleString('en-IN')}</div>`;
-                listContainer.appendChild(item);
+        if(keys) {
+            keys.addEventListener('click', e => {
+                if (!e.target.matches('button')) return;
+                const action = e.target.dataset.action;
+                const keyContent = e.target.textContent;
+                if (!action) handleInput(keyContent);
+                else if (action === 'operator') handleInput(keyContent);
+                else if (action === 'decimal') handleInput('.');
+                else if (action === 'clear') handleClear();
+                else if (action === 'backspace') handleBackspace();
+                else if (action === 'calculate') handleCalculate();
+                updateDisplay();
             });
-        };
+        }
+
+        // Recent Transactions for Calculator Page
+        const listContainer = document.getElementById('recent-transactions-list');
+        const filterTabs = document.querySelectorAll('.filter-btn'); // Re-select specifically for calc page if needed
+        
+        const getCategoryIconCal = (category) => ({ 'Salary': 'briefcase', 'Food': 'utensils', 'Transport': 'car', 'Shopping': 'shopping-bag', 'Bills': 'file-invoice-dollar', 'Other': 'receipt' }[category] || 'receipt');
 
         const fetchAndRenderRecentTransactions = async (filterType = 'all') => {
             let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&days=30`;
             if (filterType !== 'all') { url += `&type=${filterType}`; }
             try {
                 const transactions = await fetchApi(url);
-                renderRecentTransactions(transactions);
+                if(listContainer) {
+                    listContainer.innerHTML = '';
+                    if (!transactions || transactions.length === 0) {
+                        listContainer.innerHTML = '<p style="text-align: center; color: #777;">No transactions in the last 30 days.</p>';
+                        return;
+                    }
+                    transactions.forEach(t => {
+                        const item = document.createElement('div');
+                        item.className = `transaction-item ${t.type}`;
+                        item.innerHTML = `<div class="transaction-icon"><i class="fas fa-${getCategoryIconCal(t.category)}"></i></div><div class="transaction-details"><span class="category">${t.category}</span><span class="description">${new Date(t.transaction_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span></div><div class="transaction-amount">${t.type === 'income' ? '+' : '-'} ₹${parseFloat(t.amount).toLocaleString('en-IN')}</div>`;
+                        listContainer.appendChild(item);
+                    });
+                }
             } catch (error) { }
         };
 
-        filterTabs.addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-btn')) {
-                filterTabs.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                fetchAndRenderRecentTransactions(e.target.dataset.filter);
-            }
+        filterTabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterTabs.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                fetchAndRenderRecentTransactions(btn.dataset.filter);
+            });
         });
         
         updateDisplay();

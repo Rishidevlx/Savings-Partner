@@ -1,5 +1,5 @@
 // CHANGE v1 TO v2 HERE (Idhu dhan mukkiyam)
-const CACHE_NAME = "savings-partner-v3"; 
+const CACHE_NAME = "savings-partner-v4"; 
 
 const ASSETS_TO_CACHE = [
   "/",
