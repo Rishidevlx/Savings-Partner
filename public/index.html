@@ -4,37 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Get Started | Savings Partner</title>
-    <!-- Corrected Path for Stylesheet -->
     <link rel="stylesheet" href="./css/style.css">
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Toastify CSS for Professional Notifications -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <!-- PWA MANIFEST LINK -->
     <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#00A79D">
-<link rel="apple-touch-icon" href="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882">
-<script>
-        // Instant Redirect Logic
+    <meta name="theme-color" content="#00A79D">
+
+    <!-- 🔥 AUTO LOGIN SCRIPT (HEAD) 🔥 -->
+    <style>
+        /* Hide body initially to prevent login screen flash */
+        body { visibility: hidden; opacity: 0; transition: opacity 0.3s; }
+    </style>
+
+    <script>
         (function() {
             try {
                 const userStr = localStorage.getItem('user');
                 if (userStr) {
                     const user = JSON.parse(userStr);
                     if (user && user.id) {
-                        // Prevent Login Page from showing
-                        document.documentElement.style.display = 'none';
-                        
-                        // Redirect immediately
+                        // User Found! Redirect immediately
+                        // Use replace to prevent going back to login
                         if (user.role === 'admin') {
                             window.location.replace('/admin.html');
                         } else {
                             window.location.replace('/dashboard.html');
                         }
+                    } else {
+                        // Invalid user data, show login
+                        window.onload = function() { 
+                            document.body.style.visibility = 'visible'; 
+                            document.body.style.opacity = '1';
+                        };
                     }
+                } else {
+                    // No user, show login
+                    window.onload = function() { 
+                        document.body.style.visibility = 'visible'; 
+                        document.body.style.opacity = '1';
+                    };
                 }
             } catch (e) {
                 console.error("Auto-login error", e);
-                localStorage.removeItem('user'); // Clear corrupt data
+                localStorage.removeItem('user'); 
+                window.onload = function() { 
+                    document.body.style.visibility = 'visible'; 
+                    document.body.style.opacity = '1';
+                };
             }
         })();
     </script>
@@ -44,7 +62,6 @@
         <!-- Left Panel -->
         <div class="left-panel">
             <div class="slider-container">
-                <!-- Slide 1: Static Welcome Content -->
                 <div class="slide text-slide active">
                     <div class="logo">
                         <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="Savings Partner Logo">                 
@@ -52,9 +69,7 @@
                     <h1>Welcome to Savings Partner!</h1>
                     <p>A community to track your savings, achieve your financial goals together.</p>
                 </div>
-                <!-- Slide 2: Background Image -->
                 <div class="slide image-slide" style="background-image: url('https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Slide_1-removebg-preview.png?updatedAt=1762282796166');"></div>
-                <!-- Slide 3: Background Image -->
                 <div class="slide image-slide" style="background-image: url('https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/slide_2_replace-removebg-preview.png?updatedAt=1762283459944');"></div>
             </div>
              <div class="slider-dots">
@@ -100,7 +115,7 @@
                     </form>
                 </div>
 
-                <!-- Sign In Form (Initially Hidden) -->
+                <!-- Sign In Form -->
                  <div id="signin-section" class="form-section">
                     <div class="form-header">
                         <h2>Welcome Back!</h2>
@@ -123,11 +138,8 @@
         </div>
     </div>
     
-    <!-- Just Validate Library -->
     <script src="https://unpkg.com/just-validate@latest/dist/just-validate.production.min.js"></script>
-    <!-- Toastify JS for Professional Notifications -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <!-- Corrected Path for Script -->
     <script src="./js/script.js"></script>
     <script src="./js/pwa.js"></script>
 </body>

@@ -1,4 +1,6 @@
-const CACHE_NAME = "savings-partner-v1";
+// CHANGE v1 TO v2 HERE (Idhu dhan mukkiyam)
+const CACHE_NAME = "savings-partner-v2"; 
+
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
@@ -39,6 +41,7 @@ const ASSETS_TO_CACHE = [
   "/js/ledger-details.js",
   "/js/connected-goal-details.js",
   "/js/admin.js",
+  "/js/pwa.js", 
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css",
   "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css",
   "https://cdn.jsdelivr.net/npm/toastify-js"
@@ -46,44 +49,41 @@ const ASSETS_TO_CACHE = [
 
 // Install Service Worker
 self.addEventListener("install", (event) => {
+  self.skipWaiting(); // Forces this new worker to activate immediately
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log("Opened cache");
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
-// Activate Service Worker
+// Activate Service Worker (Delete Old Cache)
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cache) => {
           if (cache !== CACHE_NAME) {
+            console.log("Deleting Old Cache:", cache);
             return caches.delete(cache);
           }
         })
       );
     })
   );
+  return self.clients.claim(); // Take control immediately
 });
 
-// Fetch Strategy: Network First for API, Cache First for Static Files
+// Fetch Strategy
 self.addEventListener("fetch", (event) => {
-  // If request is for API, go to Network directly (Don't cache API responses for now to ensure fresh data)
   if (event.request.url.includes("/api/")) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // For other files (HTML, CSS, JS), try Cache first, then Network
   event.respondWith(
     caches.match(event.request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(event.request);
+      return response || fetch(event.request);
     })
   );
 });
