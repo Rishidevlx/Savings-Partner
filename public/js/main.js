@@ -1,5 +1,24 @@
 // public/js/main.js
 
+// GLOBAL LOGOUT FUNCTION (Direct Access)
+window.logout = function() {
+    // 1. Clear User Data
+    localStorage.removeItem('user');
+    localStorage.clear(); // Clear everything to be safe
+
+    // 2. Unregister Service Worker (Fix for PWA Cache issues)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for(let registration of registrations) {
+                registration.unregister();
+            }
+        });
+    }
+
+    // 3. Force Redirect to Login
+    window.location.href = '/index.html';
+};
+    // ... (Unga pazhaya code inga thodangattum) ...
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = 'http://localhost:3000/api';
