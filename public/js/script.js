@@ -2,20 +2,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. AUTO LOGIN LOGIC (NEW FEATURE) ---
-    // App open pannadhum user irukangala nu check pannum
-    const checkUser = () => {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user && user.id) {
-            // User irundha, direct-a ulla anuppidu
-            if (user.role === 'admin') {
-                window.location.href = '/admin.html';
-            } else {
-                window.location.href = '/dashboard.html';
-            }
-        }
-    };
-    checkUser(); // Run immediately
 
     // --- 2. SLIDER LOGIC ---
     const slides = document.querySelectorAll('.slide');

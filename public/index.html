@@ -13,6 +13,31 @@
     <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#00A79D">
 <link rel="apple-touch-icon" href="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882">
+<script>
+        // Instant Redirect Logic
+        (function() {
+            try {
+                const userStr = localStorage.getItem('user');
+                if (userStr) {
+                    const user = JSON.parse(userStr);
+                    if (user && user.id) {
+                        // Prevent Login Page from showing
+                        document.documentElement.style.display = 'none';
+                        
+                        // Redirect immediately
+                        if (user.role === 'admin') {
+                            window.location.replace('/admin.html');
+                        } else {
+                            window.location.replace('/dashboard.html');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Auto-login error", e);
+                localStorage.removeItem('user'); // Clear corrupt data
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="container">
