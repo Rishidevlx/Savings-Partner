@@ -37,13 +37,14 @@
                 <li><a href="accounts.html"><i class="fas fa-address-book"></i><span>Accounts</span></a></li>
             </ul>
             <ul class="sidebar-footer">
-                <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
-               <li>
-                     <a href="javascript:void(0)" onclick="logout()">
-                     <i class="fas fa-sign-out-alt"></i><span>Logout</span>
-                    </a>
-                </li>
-            </ul>
+    <li><a href="./settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+    <!-- DIRECT LOGOUT SCRIPT -->
+    <li>
+        <a href="javascript:void(0)" onclick="forceLogout()">
+            <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+        </a>
+    </li>
+</ul>
         </nav>
 
         <!-- Main Content -->
@@ -146,5 +147,18 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="./js/main.js"></script>
     <script src="./js/pwa.js"></script>
+    <script>
+    function forceLogout() {
+        localStorage.clear(); // Clear all data
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister(); // Clear PWA cache
+                }
+            });
+        }
+        window.location.href = 'index.html'; // Go to login
+    }
+</script>
 </body>
 </html>
