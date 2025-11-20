@@ -1,22 +1,64 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    const API_URL = '/api';
+    const API_URL = 'http://localhost:3000/api';
     
     const user = JSON.parse(localStorage.getItem('user'));
     const CURRENT_USER_ID = user ? user.id : null;
 
+    // --- 1. GLOBAL LOGOUT LOGIC (FIXED) ---
+    // Idhu ella page layum work aagum
+    const logoutBtn = document.querySelector('.sidebar-footer a[href*="index.html"]') || 
+                      document.querySelector('.fa-sign-out-alt').closest('a');
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault(); // Stop normal navigation
+            e.stopPropagation(); // Stop other events
+            
+            // 1. Clear LocalStorage
+            localStorage.removeItem('user');
+            
+            // 2. Force Redirect to Login Page
+            window.location.replace('/index.html');
+        });
+    }
+    // ---------------------------------------
+
+    // --- 2. MOBILE SIDEBAR TOGGLE (Universal Fix) ---
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('overlay-bg') || document.querySelector('.overlay-bg'); // Handle both IDs/Classes
+
     if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('active');
+        // Open
+        sidebarToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sidebar.classList.add('active');
+            sidebar.classList.add('open'); // Add both for safety
+            if(overlay) overlay.classList.add('active');
         });
+
+        // Close Function
+        const closeMenu = () => {
+            sidebar.classList.remove('active');
+            sidebar.classList.remove('open');
+            if(overlay) overlay.classList.remove('active');
+        };
+
+        // Close on Overlay Click
+        if(overlay) overlay.addEventListener('click', closeMenu);
+
+        // Close on 'X' Button Click (If exists)
+        const closeBtn = document.querySelector('.close-sidebar-btn');
+        if(closeBtn) closeBtn.addEventListener('click', closeMenu);
+
+        // Close when clicking outside (Fallback)
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && 
+                (sidebar.classList.contains('active') || sidebar.classList.contains('open')) && 
                 !sidebar.contains(e.target) && 
-                e.target !== sidebarToggle && 
-                !sidebarToggle.contains(e.target)) {
-                sidebar.classList.remove('active');
+                e.target !== sidebarToggle) {
+                closeMenu();
             }
         });
     }
@@ -25,15 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
         Toastify({ text: message, duration: 3000, gravity: "top", position: "right", stopOnFocus: true, style: { background: type === 'success' ? "linear-gradient(to right, #00A79D, #00b09b)" : "linear-gradient(to right, #e74c3c, #ff5f6d)" } }).showToast();
     };
 
-    function setupModal(openBtnId, closeBtnId, overlayId) {
-        const openBtn = document.getElementById(openBtnId);
-        const closeBtn = document.getElementById(closeBtnId);
-        const overlay = document.getElementById(overlayId);
-        if (openBtn) openBtn.addEventListener('click', () => overlay.classList.add('active'));
-        if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
-        if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
-    }
-    
     const fetchApi = async (url, options = {}) => {
         try {
             const response = await fetch(url, options);
@@ -49,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) { showToast(error.message, 'error'); throw error; }
     };
 
+    // --- PAGE ROUTING LOGIC ---
     if (document.querySelector('.welcome-message')) {
         if (!user) { window.location.href = '/index.html'; return; }
         initDashboardPage();
@@ -60,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initCalculatorPage();
     }
 
+    // --- DASHBOARD PAGE LOGIC ---
     function initDashboardPage() {
         const formatCurrency = (amount) => `₹${parseFloat(amount).toLocaleString('en-IN')}`;
 
@@ -108,6 +143,16 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeHeader.innerHTML = `Welcome Back, ${user.fullname.split(' ')[0]}! 👋`;
         }
         
+        // Setup Modals
+        const setupModal = (openBtnId, closeBtnId, overlayId) => {
+            const openBtn = document.getElementById(openBtnId);
+            const closeBtn = document.getElementById(closeBtnId);
+            const overlay = document.getElementById(overlayId);
+            if (openBtn) openBtn.addEventListener('click', () => overlay.classList.add('active'));
+            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        }
+
         setupModal('show-cid-modal', 'close-cid-modal', 'cid-modal-overlay');
         setupModal('show-connect-modal', 'close-connect-modal', 'connect-modal-overlay');
 
@@ -175,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchDashboardConnectionRequests();
     }
 
+    // --- TRANSACTIONS PAGE LOGIC ---
     function initTransactionsPage() {
         const { jsPDF } = window.jspdf;
         const listContainer = document.getElementById('transactions-list-container');
@@ -193,7 +239,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let currentFilters = { type: 'all', search: '', startDate: '', endDate: '' }; 
         let allTransactions = [];
-        let searchTimeout;
+        
+        // Helper for Modals
+        const setupModal = (openBtnId, closeBtnId, overlayId) => {
+            const openBtn = document.getElementById(openBtnId);
+            const closeBtn = document.getElementById(closeBtnId);
+            const overlay = document.getElementById(overlayId);
+            if (openBtn) openBtn.addEventListener('click', () => overlay.classList.add('active'));
+            if (closeBtn) closeBtn.addEventListener('click', () => overlay.classList.remove('active'));
+            if (overlay) overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.classList.remove('active'); });
+        }
 
         const confirmModal = document.getElementById('confirm-modal-overlay');
         const confirmTitle = document.querySelector('#confirm-modal-overlay h3');
@@ -214,19 +269,17 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         confirmCancelBtn.addEventListener('click', () => confirmModal.classList.remove('active'));
         
-        // Fetch with Filters (Client-side filtering for Date to be instant)
         const fetchAndRenderTransactions = async () => {
-            let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&type=${currentFilters.type}&days=all`; // Fetch all first
+            let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&type=${currentFilters.type}&days=all`; 
             if (currentFilters.search) url += `&search=${encodeURIComponent(currentFilters.search)}`;
             
             try {
                 let transactions = await fetchApi(url);
                 
-                // Client Side Date Filter
                 if (currentFilters.startDate && currentFilters.endDate) {
                     const start = new Date(currentFilters.startDate);
                     const end = new Date(currentFilters.endDate);
-                    end.setHours(23, 59, 59, 999); // End of day
+                    end.setHours(23, 59, 59, 999);
                     
                     transactions = transactions.filter(t => {
                         const tDate = new Date(t.transaction_date);
@@ -261,7 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const descriptionHTML = t.description ? `<div class="description-info">${t.description.replace(/\n/g, '<br>')}</div>` : '';
                 item.innerHTML = `
                     <div class="main-info">
-                        <!-- Checkbox is hidden by CSS default -->
                         <input type="checkbox" class="transaction-checkbox" data-id="${t.id}">
                         <div class="transaction-icon"><i class="fas fa-${getCategoryIcon(t.category)}"></i></div>
                         <div class="transaction-details">
@@ -299,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { }
         });
 
+        let searchTimeout;
         searchInput.addEventListener('input', () => {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(() => {
@@ -316,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         
-        // Date Filters Logic
         startDateInput.addEventListener('change', () => { currentFilters.startDate = startDateInput.value; fetchAndRenderTransactions(); });
         endDateInput.addEventListener('change', () => { currentFilters.endDate = endDateInput.value; fetchAndRenderTransactions(); });
         clearFiltersBtn.addEventListener('click', () => {
@@ -327,14 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
             fetchAndRenderTransactions();
         });
 
-        // Bulk Select Logic
         bulkSelectBtn.addEventListener('click', () => {
-            transactionsContainer.classList.toggle('select-mode'); // This CSS class toggles checkbox visibility
+            transactionsContainer.classList.toggle('select-mode'); 
             const isSelectMode = transactionsContainer.classList.contains('select-mode');
-            
-            // Toggle Button Text
             bulkSelectBtn.innerHTML = isSelectMode ? '<i class="fas fa-times"></i> Cancel' : '<i class="fas fa-check-double"></i> Select';
-            
             deleteSelectedBtn.classList.toggle('hidden', !isSelectMode);
             if (!isSelectMode) {
                 document.querySelectorAll('.transaction-checkbox').forEach(cb => cb.checked = false);
@@ -351,7 +399,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     await fetchApi(`${API_URL}/transactions`, options);
                     showToast('Deleted successfully');
                     fetchAndRenderTransactions();
-                    // Exit select mode
                     transactionsContainer.classList.remove('select-mode');
                     deleteSelectedBtn.classList.add('hidden');
                     bulkSelectBtn.innerHTML = '<i class="fas fa-check-double"></i> Select';
@@ -378,6 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchAndRenderTransactions();
     }
 
+    // --- CALCULATOR PAGE LOGIC ---
     function initCalculatorPage() {
         const display = document.getElementById('current-value');
         const historyDisplay = document.getElementById('history-expression');
