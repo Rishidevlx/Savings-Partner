@@ -7,20 +7,102 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/transactions.css">
-    <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#00A79D">
-<link rel="apple-touch-icon" href="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
+    <!-- FORCE MOBILE STYLES -->
+    <style>
+        /* Hide X button on Desktop */
+        .close-sidebar-btn { display: none; }
+
+        @media (max-width: 768px) {
+            /* Show X button ONLY on Mobile inside Sidebar */
+            .close-sidebar-btn {
+                display: block !important;
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 28px;
+                cursor: pointer;
+                z-index: 12001;
+            }
+
+            /* Mobile Sidebar Force */
+            #sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                height: 100vh !important;
+                width: 260px !important;
+                background-color: #2c3e50 !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.3s ease-in-out !important;
+                z-index: 12000 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                box-shadow: 5px 0 15px rgba(0,0,0,0.3);
+            }
+            
+            /* Open State */
+            #sidebar.open {
+                transform: translateX(0) !important;
+            }
+
+            /* Overlay */
+            #overlay-bg {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.6);
+                z-index: 10000;
+            }
+            #overlay-bg.active { display: block !important; }
+
+            #mobile-toggle-btn {
+                display: flex !important;
+                position: fixed;
+                top: 15px;
+                right: 15px;
+                z-index: 11000;
+                background: #00A79D;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                width: 45px;
+                height: 45px;
+                font-size: 22px;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            }
+            
+            /* Fix Content Padding */
+            .main-content { padding-top: 80px !important; }
+        }
+
+        /* Hide Toggle on Desktop */
+        @media (min-width: 769px) {
+            #mobile-toggle-btn { display: none !important; }
+        }
+    </style>
 </head>
 <body>
-     <button class="mobile-toggle" id="sidebar-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
+    <!-- Mobile Toggle -->
+    <button id="mobile-toggle-btn" onclick="openSidebar()"><i class="fas fa-bars"></i></button>
+    
+    <!-- Overlay -->
+    <div id="overlay-bg" onclick="closeSidebar()"></div>
+
     <div class="page-container">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar -->
         <nav class="sidebar" id="sidebar">
+            <button class="close-sidebar-btn" onclick="closeSidebar()">&times;</button>
+            
             <div class="sidebar-header">
-               <div class="logo">
-                     <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="SP Logo">
+                <div class="logo">
+                     <img src="https://ik.imagekit.io/6dxwsh8nl/Savings%20Tracker/Piggy%20bank%20logo.jpg?updatedAt=1762283555882" alt="SP Logo" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                 </div>
                 <span class="logo-text">Savings Partner</span>
             </div>
@@ -28,13 +110,13 @@
                 <li><a href="./dashboard.html"><i class="fas fa-th-large"></i><span>Dashboard</span></a></li>
                 <li><a href="./transactions.html" class="active"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a></li>
                 <li><a href="./goals.html"><i class="fas fa-bullseye"></i><span>Goals</span></a></li>
-                <li><a href="connections.html"><i class="fas fa-users"></i><span>Connections</span></a></li>
+                <li><a href="./connections.html"><i class="fas fa-users"></i><span>Connections</span></a></li>
                 <li><a href="notes.html"><i class="fas fa-sticky-note"></i><span>Notes</span></a></li>
                 <li><a href="calculator.html"><i class="fas fa-calculator"></i><span>Calculator</span></a></li>
                 <li><a href="accounts.html"><i class="fas fa-address-book"></i><span>Accounts</span></a></li>
             </ul>
             <ul class="sidebar-footer">
-                <li><a href="settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
+                <li><a href="./settings.html"><i class="fas fa-cog"></i><span>Settings</span></a></li>
                 <li><a href="/index.html"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a></li>
             </ul>
         </nav>
@@ -78,15 +160,14 @@
             <section class="transactions-section" id="transactions-container">
                 <div class="transactions-header">
                     <h2>Transactions</h2>
-                    <!-- MODIFIED FILTERS SECTION -->
                     <div class="filters">
                          <div class="search-bar-wrapper">
                             <i class="fas fa-search"></i>
-                            <input type="text" id="transaction-search-input" placeholder="Search by category or note...">
+                            <input type="text" id="transaction-search-input" placeholder="Search...">
                         </div>
-                        <button class="btn btn-secondary" id="bulk-select-btn"><i class="fas fa-check-double"></i> Bulk Select</button>
+                        <button class="btn btn-secondary" id="bulk-select-btn"><i class="fas fa-check-double"></i> Select</button>
                         <button class="btn btn-delete hidden" id="delete-selected-btn"><i class="fas fa-trash"></i> Delete</button>
-                        <button class="btn btn-secondary" id="download-btn"><i class="fas fa-download"></i> Download</button>
+                        <button class="btn btn-secondary" id="download-btn"><i class="fas fa-download"></i> PDF</button>
                     </div>
                 </div>
                  <div class="filter-controls">
@@ -95,13 +176,13 @@
                         <button class="filter-btn" data-filter="income">Income</button>
                         <button class="filter-btn" data-filter="expense">Expense</button>
                     </div>
-                    <div class="filter-dropdown">
-                        <select class="date-filter-select">
-                            <option value="30">Last 30 Days</option>
-                            <option value="15">Last 15 Days</option>
-                            <option value="90">Last 90 Days</option>
-                            <option value="all">All Time</option>
-                        </select>
+                    
+                    <!-- Date Filter -->
+                    <div class="date-range-filter">
+                        <input type="date" id="start-date" title="Start Date">
+                        <span>to</span>
+                        <input type="date" id="end-date" title="End Date">
+                        <button id="clear-filters-btn" title="Clear Dates"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
                 <div class="transactions-list" id="transactions-list-container"></div>
@@ -109,43 +190,32 @@
         </main>
     </div>
 
-    <!-- Modals -->
+    <!-- Add Transaction Modal -->
     <div class="modal-overlay" id="transaction-modal-overlay">
         <div class="modal">
             <button class="modal-close-btn" id="close-transaction-modal">&times;</button>
             <h3>Add Transaction</h3>
-            <p>Record a new income or expense</p>
             <form id="transaction-form">
-                <div class="form-group"><label for="type">Type</label><select id="type" name="type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
-                <div class="form-group"><label for="amount">Amount (₹)</label><input type="number" id="amount" name="amount" placeholder="Enter Amount" required></div>
+                <div class="form-group"><label>Type</label><select name="type"><option value="expense">Expense</option><option value="income">Income</option></select></div>
+                <div class="form-group"><label>Amount (₹)</label><input type="number" name="amount" required></div>
                 <div class="form-group">
-                    <label for="category">Category</label>
-                    <input list="category-list" id="category" name="category" placeholder="e.g., Food, Salary, Friend" required>
+                    <label>Category</label>
+                    <input list="category-list" name="category" placeholder="e.g., Food" required>
                     <datalist id="category-list">
-                        <option value="Food"></option>
-                        <option value="Transport"></option>
-                        <option value="Salary"></option>
-                        <option value="Shopping"></option>
-                        <option value="Bills"></option>
-                        <option value="Entertainment"></option>
-                        <option value="Health"></option>
-                        <option value="Education"></option>
-                        <option value="Investment"></option>
-                        <option value="Friend"></option>
-                        <option value="Family"></option>
-                        <option value="Other"></option>
+                        <option value="Food"><option value="Transport"><option value="Salary"><option value="Shopping"><option value="Bills"><option value="Entertainment"><option value="Health"><option value="Education"><option value="Investment"><option value="Friend"><option value="Family"><option value="Other">
                     </datalist>
                 </div>
-                <div class="form-group"><label for="date">Date</label><input type="date" id="date" name="date" required></div>
-                <div class="form-group"><label for="description">Description (Optional)</label><textarea id="description" name="description" placeholder="Add a note"></textarea></div>
-                <button type="submit" class="btn btn-primary">Add Transaction</button>
+                <div class="form-group"><label>Date</label><input type="date" id="date" name="date" required></div>
+                <div class="form-group"><label>Description</label><textarea name="description"></textarea></div>
+                <button type="submit" class="btn btn-primary btn-full-width">Save</button>
             </form>
         </div>
     </div>
     
+    <!-- Delete Confirm Modal -->
     <div class="modal-overlay" id="confirm-modal-overlay">
         <div class="modal confirm-modal">
-            <h3 id="confirm-modal-title">Are you sure?</h3>
+            <h3>Are you sure?</h3>
             <p id="confirm-modal-text">This action cannot be undone.</p>
             <div class="confirm-buttons">
                 <button class="btn btn-secondary" id="confirm-cancel-btn">Cancel</button>
@@ -155,11 +225,26 @@
     </div>
     
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     
+    <!-- IMPORTANT: Loading main.js ONLY. Removed sidebar.js to avoid conflict -->
     <script src="./js/main.js"></script>
-    <script src="./js/pwa.js"></script>
+
+    <!-- INLINE SIDEBAR SCRIPT (Guaranteed to Work) -->
+    <script>
+        function openSidebar() {
+            document.getElementById('sidebar').classList.add('open');
+            document.getElementById('overlay-bg').classList.add('active');
+        }
+
+        function closeSidebar() {
+            document.getElementById('sidebar').classList.remove('open');
+            document.getElementById('overlay-bg').classList.remove('active');
+        }
+
+        // Close when clicking overlay
+        document.getElementById('overlay-bg').addEventListener('click', closeSidebar);
+    </script>
 </body>
 </html>

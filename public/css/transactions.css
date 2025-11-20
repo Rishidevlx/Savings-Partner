@@ -147,3 +147,60 @@
     .transaction-icon { width: 35px; height: 35px; font-size: 16px; }
     .description-info { padding-left: 15px; }
 }
+
+/* public/css/transactions.css */
+/* ... (Keep existing variables/layout) ... */
+
+/* Add this specific block for Date Filter Styling */
+.date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.date-range-filter input {
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    outline: none;
+}
+.date-range-filter span { font-size: 13px; color: #888; }
+#clear-filters-btn {
+    background: #fbe9e7;
+    border: none;
+    color: var(--expense-color);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+#clear-filters-btn:hover { background: var(--expense-color); color: white; }
+
+/* Hide Checkboxes by Default */
+.transaction-checkbox {
+    display: none; /* Hidden initially */
+    margin-right: 15px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-color);
+}
+
+/* Show Checkboxes when .select-mode class is added */
+.transactions-section.select-mode .transaction-checkbox {
+    display: block !important;
+}
+
+/* Mobile adjustments for Date Filter */
+@media (max-width: 768px) {
+    .date-range-filter {
+        flex-direction: row; /* Keep row but wrap if needed */
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .date-range-filter input { flex-grow: 1; }
+}

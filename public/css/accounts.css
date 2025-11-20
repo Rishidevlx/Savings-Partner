@@ -28,7 +28,7 @@
 .header-title h1 { margin: 0; font-size: 26px; color: var(--dark-blue); font-weight: 700; }
 .header-title p { margin: 5px 0 0; color: #888; font-size: 14px; }
 
-/* Actions Bar (Filter, Search, Add Button) */
+/* Actions Bar */
 .header-actions {
     display: flex;
     align-items: center;
@@ -36,11 +36,10 @@
     flex-wrap: wrap;
 }
 
-/* Inputs & Buttons Standard Height */
 .header-actions select,
 .header-actions input,
 .header-actions .btn {
-    height: 45px; /* Standard height for alignment */
+    height: 45px; 
     box-sizing: border-box;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
@@ -65,7 +64,7 @@
 }
 #search-accounts {
     border: 1px solid var(--border-color);
-    padding: 0 15px 0 40px; /* Left padding for icon */
+    padding: 0 15px 0 40px; 
     width: 250px;
     outline: none;
     transition: border-color 0.2s;
@@ -120,7 +119,6 @@
     border-color: var(--primary-color);
 }
 
-/* Card Header */
 .card-header {
     display: flex;
     justify-content: space-between;
@@ -145,7 +143,6 @@
 .account-type-badge.Client { background-color: #3498db; }
 .account-type-badge.Supplier { background-color: var(--primary-color); }
 
-/* Card Body */
 .card-body .info-row {
     display: flex;
     align-items: center;
@@ -161,7 +158,6 @@
     font-size: 16px;
 }
 
-/* Card Footer */
 .card-footer {
     margin-top: auto;
     padding-top: 15px;
@@ -172,10 +168,9 @@
 
 .btn-full-width { flex-grow: 1; }
 
-/* Action Icons (Edit/Delete) */
 .icon-btn {
     width: 45px;
-    height: 45px; /* Matches standard button height */
+    height: 45px; 
     border: 1px solid var(--border-color);
     border-radius: 8px;
     background: #fff;
@@ -198,7 +193,6 @@
     border-color: var(--danger-color);
 }
 
-/* Empty State */
 .empty-state {
     grid-column: 1 / -1;
     text-align: center;
@@ -214,7 +208,21 @@
 /* Modal Styles */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 1000; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.3s; }
 .modal-overlay.active { opacity: 1; visibility: visible; }
-.modal { background: #fff; padding: 30px; border-radius: 16px; width: 90%; max-width: 450px; position: relative; box-shadow: 0 15px 40px rgba(0,0,0,0.2); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+.modal { 
+    background: #fff; 
+    padding: 30px; 
+    border-radius: 16px; 
+    width: 90%; 
+    max-width: 500px; 
+    position: relative; 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2); 
+    transform: scale(0.9); 
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+    max-height: 90vh; /* Limit height */
+    overflow-y: auto; /* Scroll if content is long */
+}
+
 .modal-overlay.active .modal { transform: scale(1); }
 
 .modal-close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: #aaa; transition: color 0.2s; }
@@ -226,6 +234,12 @@
 .form-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 14px; color: var(--dark-blue); }
 .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; font-family: 'Poppins', sans-serif; transition: border-color 0.2s; }
 .form-group input:focus, .form-group select:focus { border-color: var(--primary-color); }
+
+/* Delete Confirmation Modal */
+.confirm-modal { text-align: center; max-width: 400px; }
+.confirm-buttons { display: flex; justify-content: center; gap: 15px; margin-top: 25px; }
+.btn-delete { background: var(--danger-color); color: #fff; }
+.btn-secondary { background: var(--border-color); color: var(--dark-blue); }
 
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
@@ -244,4 +258,11 @@
     #search-accounts { width: 100%; }
     .btn { width: 100%; }
     .filter-group select { width: 100%; }
+
+    /* FIXED: Better Modal Sizing on Mobile */
+    .modal {
+        width: 95%; 
+        padding: 20px;
+        max-height: 80vh; /* Leave some space at top/bottom */
+    }
 }

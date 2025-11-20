@@ -187,13 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalExpenseEl = document.getElementById('total-expense');
         const netBalanceEl = document.getElementById('net-balance');
         const searchInput = document.getElementById('transaction-search-input'); 
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const clearFiltersBtn = document.getElementById('clear-filters-btn');
 
-        let currentFilters = { type: 'all', days: '30', search: '' }; 
+        let currentFilters = { type: 'all', search: '', startDate: '', endDate: '' }; 
         let allTransactions = [];
         let searchTimeout;
 
         const confirmModal = document.getElementById('confirm-modal-overlay');
-        const confirmTitle = document.getElementById('confirm-modal-title');
+        const confirmTitle = document.querySelector('#confirm-modal-overlay h3');
         const confirmText = document.getElementById('confirm-modal-text');
         const confirmActionBtn = document.getElementById('confirm-action-btn');
         const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
@@ -210,15 +213,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         };
         confirmCancelBtn.addEventListener('click', () => confirmModal.classList.remove('active'));
-        confirmModal.addEventListener('click', (e) => { if(e.target === confirmModal) confirmModal.classList.remove('active'); });
-
+        
+        // Fetch with Filters (Client-side filtering for Date to be instant)
         const fetchAndRenderTransactions = async () => {
-            let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&type=${currentFilters.type}&days=${currentFilters.days}`;
-            if (currentFilters.search) { 
-                url += `&search=${encodeURIComponent(currentFilters.search)}`;
-            }
+            let url = `${API_URL}/transactions?userId=${CURRENT_USER_ID}&type=${currentFilters.type}&days=all`; // Fetch all first
+            if (currentFilters.search) url += `&search=${encodeURIComponent(currentFilters.search)}`;
+            
             try {
-                const transactions = await fetchApi(url);
+                let transactions = await fetchApi(url);
+                
+                // Client Side Date Filter
+                if (currentFilters.startDate && currentFilters.endDate) {
+                    const start = new Date(currentFilters.startDate);
+                    const end = new Date(currentFilters.endDate);
+                    end.setHours(23, 59, 59, 999); // End of day
+                    
+                    transactions = transactions.filter(t => {
+                        const tDate = new Date(t.transaction_date);
+                        return tDate >= start && tDate <= end;
+                    });
+                }
+
                 allTransactions = transactions;
                 renderTransactionList(transactions);
                 updateStatsCards(transactions);
@@ -235,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const renderTransactionList = (transactions) => {
             listContainer.innerHTML = '';
             if (transactions.length === 0) {
-                listContainer.innerHTML = '<p style="text-align: center; color: #777; padding: 20px 0;">No transactions found for the selected filters.</p>';
+                listContainer.innerHTML = '<p style="text-align: center; color: #777; padding: 20px 0;">No transactions found.</p>';
                 return;
             }
             transactions.forEach(t => {
@@ -246,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const descriptionHTML = t.description ? `<div class="description-info">${t.description.replace(/\n/g, '<br>')}</div>` : '';
                 item.innerHTML = `
                     <div class="main-info">
+                        <!-- Checkbox is hidden by CSS default -->
                         <input type="checkbox" class="transaction-checkbox" data-id="${t.id}">
                         <div class="transaction-icon"><i class="fas fa-${getCategoryIcon(t.category)}"></i></div>
                         <div class="transaction-details">
@@ -299,14 +315,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 fetchAndRenderTransactions();
             }
         });
-        document.querySelector('.date-filter-select').addEventListener('change', (e) => {
-            currentFilters.days = e.target.value;
+        
+        // Date Filters Logic
+        startDateInput.addEventListener('change', () => { currentFilters.startDate = startDateInput.value; fetchAndRenderTransactions(); });
+        endDateInput.addEventListener('change', () => { currentFilters.endDate = endDateInput.value; fetchAndRenderTransactions(); });
+        clearFiltersBtn.addEventListener('click', () => {
+            startDateInput.value = '';
+            endDateInput.value = '';
+            currentFilters.startDate = '';
+            currentFilters.endDate = '';
             fetchAndRenderTransactions();
         });
 
+        // Bulk Select Logic
         bulkSelectBtn.addEventListener('click', () => {
-            transactionsContainer.classList.toggle('select-mode');
+            transactionsContainer.classList.toggle('select-mode'); // This CSS class toggles checkbox visibility
             const isSelectMode = transactionsContainer.classList.contains('select-mode');
+            
+            // Toggle Button Text
+            bulkSelectBtn.innerHTML = isSelectMode ? '<i class="fas fa-times"></i> Cancel' : '<i class="fas fa-check-double"></i> Select';
+            
             deleteSelectedBtn.classList.toggle('hidden', !isSelectMode);
             if (!isSelectMode) {
                 document.querySelectorAll('.transaction-checkbox').forEach(cb => cb.checked = false);
@@ -317,12 +345,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const idsToDelete = Array.from(document.querySelectorAll('.transaction-checkbox:checked')).map(cb => cb.dataset.id);
             if (idsToDelete.length === 0) return showToast('Please select transactions.', 'error');
             
-            showConfirmationModal('Delete Transaction(s)?', `Are you sure you want to delete ${idsToDelete.length} transaction(s)?`, async () => {
+            showConfirmationModal('Delete Transactions?', `Delete ${idsToDelete.length} transaction(s)?`, async () => {
                 const options = { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: CURRENT_USER_ID, ids: idsToDelete }) };
                 try {
-                    const result = await fetchApi(`${API_URL}/transactions`, options);
-                    showToast(result.message);
+                    await fetchApi(`${API_URL}/transactions`, options);
+                    showToast('Deleted successfully');
                     fetchAndRenderTransactions();
+                    // Exit select mode
+                    transactionsContainer.classList.remove('select-mode');
+                    deleteSelectedBtn.classList.add('hidden');
+                    bulkSelectBtn.innerHTML = '<i class="fas fa-check-double"></i> Select';
                 } catch (error) { }
             });
         });
@@ -337,8 +369,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 tableRows.push([ new Date(item.transaction_date).toLocaleDateString("en-GB"), item.category, item.description || "-", item.type.charAt(0).toUpperCase() + item.type.slice(1), item.amount ]);
             });
             doc.autoTable(tableColumn, tableRows, { startY: 30 });
-            doc.save(`transactions_report_${new Date().toISOString().split('T')[0]}.pdf`);
-            showToast("Report downloaded successfully!");
+            doc.save(`transactions_${new Date().toISOString().split('T')[0]}.pdf`);
+            showToast("Downloaded!");
         });
         
         setupModal('add-transaction-btn', 'close-transaction-modal', 'transaction-modal-overlay');
