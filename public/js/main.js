@@ -1,3 +1,5 @@
+// public/js/main.js
+
 document.addEventListener('DOMContentLoaded', () => {
 
     const API_URL = 'http://localhost:3000/api';
@@ -5,20 +7,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = JSON.parse(localStorage.getItem('user'));
     const CURRENT_USER_ID = user ? user.id : null;
 
-    // --- 1. GLOBAL LOGOUT LOGIC (FIXED) ---
-    // Idhu ella page layum work aagum
-    const logoutBtn = document.querySelector('.sidebar-footer a[href*="index.html"]') || 
-                      document.querySelector('.fa-sign-out-alt').closest('a');
+    // --- 1. STRICT LOGOUT LOGIC (FIXED) ---
+    // Using ID Selector for 100% accuracy
+    const logoutBtn = document.getElementById('logout-btn');
 
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
-            e.preventDefault(); // Stop normal navigation
-            e.stopPropagation(); // Stop other events
+            e.preventDefault(); // Link vela seiya vidama thadukkurom
+            e.stopPropagation();
             
-            // 1. Clear LocalStorage
+            // Clear Data Completely
             localStorage.removeItem('user');
+            localStorage.clear(); // Safe side, clear everything
             
-            // 2. Force Redirect to Login Page
+            // Force Redirect to Login
             window.location.replace('/index.html');
         });
     }
@@ -27,32 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 2. MOBILE SIDEBAR TOGGLE (Universal Fix) ---
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('overlay-bg') || document.querySelector('.overlay-bg'); // Handle both IDs/Classes
+    const overlay = document.getElementById('overlay-bg') || document.querySelector('.overlay-bg');
 
     if (sidebarToggle && sidebar) {
-        // Open
         sidebarToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             sidebar.classList.add('active');
-            sidebar.classList.add('open'); // Add both for safety
+            sidebar.classList.add('open');
             if(overlay) overlay.classList.add('active');
         });
 
-        // Close Function
         const closeMenu = () => {
             sidebar.classList.remove('active');
             sidebar.classList.remove('open');
             if(overlay) overlay.classList.remove('active');
         };
 
-        // Close on Overlay Click
         if(overlay) overlay.addEventListener('click', closeMenu);
 
-        // Close on 'X' Button Click (If exists)
         const closeBtn = document.querySelector('.close-sidebar-btn');
         if(closeBtn) closeBtn.addEventListener('click', closeMenu);
 
-        // Close when clicking outside (Fallback)
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && 
                 (sidebar.classList.contains('active') || sidebar.classList.contains('open')) && 
@@ -143,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomeHeader.innerHTML = `Welcome Back, ${user.fullname.split(' ')[0]}! 👋`;
         }
         
-        // Setup Modals
         const setupModal = (openBtnId, closeBtnId, overlayId) => {
             const openBtn = document.getElementById(openBtnId);
             const closeBtn = document.getElementById(closeBtnId);
@@ -196,10 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = e.target;
             const requestItem = target.closest('.request-item');
             if (!requestItem) return;
-            
             const requestId = requestItem.dataset.requestId;
             const action = target.classList.contains('btn-accept') ? 'accept' : target.classList.contains('btn-reject') ? 'decline' : null;
-
             if (action) {
                 try {
                     await fetchApi(`${API_URL}/connections/${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId: CURRENT_USER_ID, requestId }) });
@@ -240,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentFilters = { type: 'all', search: '', startDate: '', endDate: '' }; 
         let allTransactions = [];
         
-        // Helper for Modals
         const setupModal = (openBtnId, closeBtnId, overlayId) => {
             const openBtn = document.getElementById(openBtnId);
             const closeBtn = document.getElementById(closeBtnId);
