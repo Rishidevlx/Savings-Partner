@@ -99,8 +99,8 @@ const sendPendingReminders = async () => {
     }
 };
 
-cron.schedule('*/15 * * * *', sendPendingReminders);
-cron.schedule('0 8 * * *', sendPendingReminders);
+// cron.schedule('*/15 * * * *', sendPendingReminders);
+// cron.schedule('0 8 * * *', sendPendingReminders);
 
 // --- AUTHENTICATION ---
 
