@@ -2,7 +2,22 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- 1. SLIDER LOGIC (Background Animation) ---
+    // --- 1. AUTO LOGIN LOGIC (NEW FEATURE) ---
+    // App open pannadhum user irukangala nu check pannum
+    const checkUser = () => {
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && user.id) {
+            // User irundha, direct-a ulla anuppidu
+            if (user.role === 'admin') {
+                window.location.href = '/admin.html';
+            } else {
+                window.location.href = '/dashboard.html';
+            }
+        }
+    };
+    checkUser(); // Run immediately
+
+    // --- 2. SLIDER LOGIC ---
     const slides = document.querySelectorAll('.slide');
     const dots = document.querySelectorAll('.dot');
     let currentSlide = 0;
@@ -13,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
             slide.classList.remove('active');
             if (dots[i]) dots[i].classList.remove('active');
         });
-        slides[index].classList.add('active');
-        if (dots[index]) dots[index].classList.add('active');
+        if(slides[index]) slides[index].classList.add('active');
+        if(dots[index]) dots[index].classList.add('active');
     }
 
     function nextSlide() {
@@ -22,13 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
         showSlide(currentSlide);
     }
     
-    // Initialize Slider
     if(slides.length > 0) {
         showSlide(currentSlide);
         setInterval(nextSlide, slideInterval);
     }
 
-    // --- 2. FORM TOGGLE LOGIC (Sign In <-> Sign Up) ---
+    // --- 3. FORM TOGGLE LOGIC ---
     const showSigninBtn = document.getElementById('show-signin');
     const showSignupBtn = document.getElementById('show-signup');
     const signupSection = document.getElementById('signup-section');
@@ -48,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 3. PASSWORD VISIBILITY TOGGLE ---
+    // --- 4. PASSWORD VISIBILITY ---
     const togglePasswordIcons = document.querySelectorAll('.toggle-password');
     togglePasswordIcons.forEach(icon => {
         icon.addEventListener('click', function (e) {
@@ -61,8 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- 4. API CONFIGURATION ---
-    // Leave empty for relative path (Works on both Vercel & Localhost automatically)
+    // --- 5. API & VALIDATION ---
     const API_URL = ''; 
 
     const showToast = (message, type = 'success') => {
@@ -80,68 +93,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }).showToast();
     };
 
-    // --- 5. VALIDATION LOGIC ---
-
-    // Strict Email Regex (Checks for text@domain.extension)
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    
-    // Strict Password Regex (Min 8 chars, 1 Letter, 1 Number)
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/;
 
-
-    // --- SIGN UP VALIDATION ---
-    const signupValidator = new JustValidate('#signup-form', {
-        validateBeforeSubmitting: true,
-    });
-
+    // SIGN UP
+    const signupValidator = new JustValidate('#signup-form', { validateBeforeSubmitting: true });
     signupValidator
-        .addField('#fullname', [
-            { rule: 'required', errorMessage: 'Full Name is required' },
-            { rule: 'minLength', value: 3, errorMessage: 'Name must be at least 3 characters' }
-        ])
-        .addField('#phone', [
-            { rule: 'required', errorMessage: 'Phone Number is required' },
-            { rule: 'number', errorMessage: 'Phone must contain numbers only' },
-            { rule: 'minLength', value: 10, errorMessage: 'Invalid Phone Number' },
-            { rule: 'maxLength', value: 10, errorMessage: 'Invalid Phone Number' }
-        ])
-        .addField('#signup-email', [
-            { rule: 'required', errorMessage: 'Email is required' },
-            { rule: 'customRegexp', value: emailRegex, errorMessage: 'Enter a valid email (e.g., user@mail.com)' }
-        ])
-        .addField('#signup-password', [
-            { rule: 'required', errorMessage: 'Password is required' },
-            { rule: 'customRegexp', value: passwordRegex, errorMessage: 'Min 8 chars, at least 1 letter & 1 number' }
-        ])
-        .addField('#confirm-password', [
-            { rule: 'required', errorMessage: 'Confirm Password is required' },
-            { 
-                validator: (value, fields) => value === fields['#signup-password'].elem.value,
-                errorMessage: "Passwords do not match",
-            }
-        ])
+        .addField('#fullname', [{ rule: 'required' }, { rule: 'minLength', value: 3 }])
+        .addField('#phone', [{ rule: 'required' }, { rule: 'number' }, { rule: 'minLength', value: 10 }, { rule: 'maxLength', value: 10 }])
+        .addField('#signup-email', [{ rule: 'required' }, { rule: 'customRegexp', value: emailRegex, errorMessage: 'Enter a valid email' }])
+        .addField('#signup-password', [{ rule: 'required' }, { rule: 'customRegexp', value: passwordRegex, errorMessage: 'Min 8 chars, letter & number' }])
+        .addField('#confirm-password', [{ rule: 'required' }, { validator: (value, fields) => value === fields['#signup-password'].elem.value, errorMessage: "Passwords do not match" }])
         .onSuccess(async (event) => {
             event.preventDefault();
             const form = document.getElementById('signup-form');
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
-
-            // Loading State
-            submitBtn.innerText = "Creating Account...";
+            submitBtn.innerText = "Creating...";
             submitBtn.disabled = true;
-
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
 
             try {
                 const response = await fetch(`${API_URL}/api/signup`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
                 });
-                
                 const result = await response.json();
-
                 if (response.ok) {
                     showToast('Sign up successful! Please log in.');
                     showSigninBtn.click();
@@ -150,83 +127,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(result.message || 'Signup failed', 'error');
                 }
             } catch (error) {
-                console.error('Signup fetch error:', error);
-                showToast('Server error. Please try again later.', 'error');
+                showToast('Server error. Try again.', 'error');
             } finally {
                 submitBtn.innerText = originalText;
                 submitBtn.disabled = false;
             }
         });
 
-    // --- SIGN IN VALIDATION (STRICT) ---
-    const signinValidator = new JustValidate('#signin-form', {
-        validateBeforeSubmitting: true,
-    });
-
+    // SIGN IN
+    const signinValidator = new JustValidate('#signin-form', { validateBeforeSubmitting: true });
     signinValidator
-        .addField('#signin-email', [
-            { rule: 'required', errorMessage: 'Email is required' },
-            { rule: 'customRegexp', value: emailRegex, errorMessage: 'Please enter a valid email address' }
-        ])
-        .addField('#signin-password', [
-            { rule: 'required', errorMessage: 'Password is required' },
-            { rule: 'minLength', value: 8, errorMessage: 'Password must be at least 8 characters long' }
-        ])
+        .addField('#signin-email', [{ rule: 'required' }, { rule: 'customRegexp', value: emailRegex, errorMessage: 'Enter a valid email' }])
+        .addField('#signin-password', [{ rule: 'required' }])
         .onSuccess(async (event) => {
             event.preventDefault();
             const form = document.getElementById('signin-form');
             const submitBtn = form.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerText;
-
-            // Loading State (Professional Touch)
             submitBtn.innerText = "Signing In...";
             submitBtn.disabled = true;
-            submitBtn.style.opacity = "0.7";
 
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData.entries());
-
-             try {
+            try {
                 const response = await fetch(`${API_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(Object.fromEntries(new FormData(form).entries())),
                 });
-                
                 const result = await response.json();
-
                 if (response.ok && result.user) {
-                    // Store user data
                     localStorage.setItem('user', JSON.stringify(result.user));
-
-                    // Success Toast
                     Toastify({
-                        text: "Login successful! Redirecting...",
-                        duration: 2000,
+                        text: "Success! Redirecting...",
+                        duration: 1500,
                         gravity: "top",
                         position: "right",
-                        style: { background: "linear-gradient(to right, #00A79D, #00b09b)" },
+                        style: { background: "#00A79D" },
                         callback: () => {
-                            // Role Based Redirect
-                            if (result.user.role === 'admin') {
-                                window.location.href = '/admin.html';
-                            } else {
-                                window.location.href = '/dashboard.html';
-                            }
+                            // Redirect based on Role
+                            if (result.user.role === 'admin') window.location.href = '/admin.html';
+                            else window.location.href = '/dashboard.html';
                         }
                     }).showToast();
                 } else {
                     showToast(result.message || 'Invalid Credentials', 'error');
                     submitBtn.innerText = originalText;
                     submitBtn.disabled = false;
-                    submitBtn.style.opacity = "1";
                 }
             } catch (error) {
-                console.error('Signin fetch error:', error);
-                showToast('Unable to connect to server.', 'error');
+                showToast('Connection failed.', 'error');
                 submitBtn.innerText = originalText;
                 submitBtn.disabled = false;
-                submitBtn.style.opacity = "1";
             }
         });
 });

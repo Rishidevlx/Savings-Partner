@@ -1,31 +1,45 @@
 // public/js/sidebar.js
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Sidebar JS Loaded"); // Debug check
-
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebar = document.getElementById('sidebar');
 
+    // 1. Sidebar Toggle Logic
     if (sidebarToggle && sidebar) {
-        // Toggle click event
         sidebarToggle.addEventListener('click', (e) => {
-            e.stopPropagation(); // Stop clicks from closing immediately
-            console.log("Toggle Clicked"); // Debug check
+            e.stopPropagation();
             sidebar.classList.toggle('active');
         });
 
-        // Close sidebar when clicking outside
         document.addEventListener('click', (e) => {
             if (window.innerWidth <= 768 && 
                 sidebar.classList.contains('active') && 
                 !sidebar.contains(e.target) && 
                 e.target !== sidebarToggle) {
-                
-                console.log("Closing Sidebar"); // Debug check
                 sidebar.classList.remove('active');
             }
         });
-    } else {
-        console.error("Error: Sidebar elements not found. Check IDs 'sidebar' and 'sidebar-toggle'");
+
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                sidebar.classList.remove('active');
+            }
+        });
+    }
+
+    // 2. LOGOUT LOGIC (NEW ADDITION)
+    // Ella page layum sidebar footer la logout link iruku. Adha pidichu handle pandrom.
+    const logoutLink = document.querySelector('.sidebar-footer a[href*="index.html"]');
+    
+    if (logoutLink) {
+        logoutLink.addEventListener('click', (e) => {
+            e.preventDefault(); // Link vela seiya vidama thadukurom
+            
+            // Clear Data
+            localStorage.removeItem('user');
+            
+            // Redirect to Login
+            window.location.href = '/index.html';
+        });
     }
 });
